@@ -1,0 +1,415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WhatsApp AI Bot Dashboard - EltonDeanTech</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Sidebar -->
+    <div class="sidebar" id="sidebar">
+        <div class="logo">
+            <span class="logo-icon">🤖</span>
+            <span class="logo-text">AKay automated agent Bot Dashboard</span>
+        </div>
+        
+        <nav class="nav-menu">
+            <a href="#" class="nav-item active" onclick="showPage('overview')">
+                <span class="nav-icon">📊</span>
+                <span class="nav-text">Overview</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('conversations')">
+                <span class="nav-icon">💬</span>
+                <span class="nav-text">Conversations</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('analytics')">
+                <span class="nav-icon">📈</span>
+                <span class="nav-text">Analytics</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('settings')">
+                <span class="nav-icon">⚙️</span>
+                <span class="nav-text">Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('users')">
+                <span class="nav-icon">👥</span>
+                <span class="nav-text">Users</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('ai-config')">
+                <span class="nav-icon">🧠</span>
+                <span class="nav-text">AI Config</span>
+            </a>
+        </nav>
+
+        <div class="sidebar-footer">
+            <div class="user-info">
+                <div class="user-avatar">ED</div>
+                <div class="user-details">
+                    <div class="user-name">EltonDeanTech</div>
+                    <div class="user-role">Administrator</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-left">
+                <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
+                <h1 class="page-title" id="pageTitle">Dashboard Overview</h1>
+            </div>
+            <div class="header-right">
+                <div class="status-badge online">
+                    <span class="status-dot"></span>
+                    Bot Online
+                </div>
+                <button class="notification-btn">
+                    🔔
+                    <span class="notification-count">3</span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Overview Page -->
+        <div id="overview-page" class="page active">
+            <!-- Stats Cards -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);">💬</div>
+                    <div class="stat-details">
+                        <div class="stat-label">Total Messages</div>
+                        <div class="stat-value" id="totalMessages">1,247</div>
+                        <div class="stat-change positive">+12% from last week</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);">👥</div>
+                    <div class="stat-details">
+                        <div class="stat-label">Active Users</div>
+                        <div class="stat-value" id="activeUsers">89</div>
+                        <div class="stat-change positive">+23% from last week</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);">⚡</div>
+                    <div class="stat-details">
+                        <div class="stat-label">Avg Response Time</div>
+                        <div class="stat-value">1.2s</div>
+                        <div class="stat-change positive">-0.3s from last week</div>
+                    </div>
+                </div>
+
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);">😊</div>
+                    <div class="stat-details">
+                        <div class="stat-label">Satisfaction Rate</div>
+                        <div class="stat-value">94%</div>
+                        <div class="stat-change positive">+5% from last week</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="charts-row">
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>Message Activity</h3>
+                        <select class="chart-filter">
+                            <option>Last 7 Days</option>
+                            <option>Last 30 Days</option>
+                            <option>Last 90 Days</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="activityChart"></canvas>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="chart-header">
+                        <h3>User Engagement</h3>
+                        <select class="chart-filter">
+                            <option>Today</option>
+                            <option>This Week</option>
+                            <option>This Month</option>
+                        </select>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="engagementChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="activity-section">
+                <div class="section-header">
+                    <h3>Recent Conversations</h3>
+                    <button class="btn-secondary" onclick="showPage('conversations')">View All</button>
+                </div>
+                <div class="activity-list" id="activityList">
+                    <!-- Activity items will be populated by JavaScript -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Conversations Page -->
+        <div id="conversations-page" class="page">
+            <div class="page-header">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search conversations..." id="searchInput" oninput="filterConversations()">
+                </div>
+                <button class="btn-primary">Export Data</button>
+            </div>
+
+            <div class="conversations-grid" id="conversationsGrid">
+                <!-- Conversations will be populated by JavaScript -->
+            </div>
+        </div>
+
+        <!-- Analytics Page -->
+        <div id="analytics-page" class="page">
+            <div class="analytics-grid">
+                <div class="analytics-card full-width">
+                    <h3>Performance Metrics</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-item">
+                            <div class="metric-label">Total Queries</div>
+                            <div class="metric-value">2,847</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Successful Responses</div>
+                            <div class="metric-value">2,678</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Success Rate</div>
+                            <div class="metric-value">94.1%</div>
+                        </div>
+                        <div class="metric-item">
+                            <div class="metric-label">Peak Hour</div>
+                            <div class="metric-value">2-4 PM</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <h3>Top Questions</h3>
+                    <div class="top-list">
+                        <div class="top-item">
+                            <span class="rank">1</span>
+                            <span class="question">What are your business hours?</span>
+                            <span class="count">247</span>
+                        </div>
+                        <div class="top-item">
+                            <span class="rank">2</span>
+                            <span class="question">How can I track my order?</span>
+                            <span class="count">189</span>
+                        </div>
+                        <div class="top-item">
+                            <span class="rank">3</span>
+                            <span class="question">What payment methods do you accept?</span>
+                            <span class="count">156</span>
+                        </div>
+                        <div class="top-item">
+                            <span class="rank">4</span>
+                            <span class="question">Do you offer refunds?</span>
+                            <span class="count">142</span>
+                        </div>
+                        <div class="top-item">
+                            <span class="rank">5</span>
+                            <span class="question">Where are you located?</span>
+                            <span class="count">128</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="analytics-card">
+                    <h3>Response Distribution</h3>
+                    <div class="distribution-chart">
+                        <canvas id="distributionChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Settings Page -->
+        <div id="settings-page" class="page">
+            <div class="settings-container">
+                <div class="settings-section">
+                    <h3>Bot Configuration</h3>
+                    <div class="settings-group">
+                        <label class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">Auto Reply</div>
+                                <div class="setting-description">Automatically respond to messages</div>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+
+                        <label class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">Context Memory</div>
+                                <div class="setting-description">Remember conversation history</div>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+
+                        <label class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">Typing Indicators</div>
+                                <div class="setting-description">Show "typing..." when generating response</div>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+
+                        <label class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">Read Receipts</div>
+                                <div class="setting-description">Mark messages as read automatically</div>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox">
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Notification Settings</h3>
+                    <div class="settings-group">
+                        <label class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">Email Notifications</div>
+                                <div class="setting-description">Receive email alerts for new messages</div>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+
+                        <label class="setting-item">
+                            <div class="setting-info">
+                                <div class="setting-label">Error Alerts</div>
+                                <div class="setting-description">Get notified when bot encounters errors</div>
+                            </div>
+                            <label class="toggle">
+                                <input type="checkbox" checked>
+                                <span class="toggle-slider"></span>
+                            </label>
+                        </label>
+                    </div>
+                </div>
+
+                <div class="settings-section">
+                    <h3>Connection Status</h3>
+                    <div class="connection-card">
+                        <div class="connection-status">
+                            <div class="status-indicator online"></div>
+                            <div>
+                                <div class="connection-title">WhatsApp Connected</div>
+                                <div class="connection-detail">Bot Number: +234 705 680 7197</div>
+                                <div class="connection-detail">Last Active: Just now</div>
+                            </div>
+                        </div>
+                        <button class="btn-danger">Disconnect</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Users Page -->
+        <div id="users-page" class="page">
+            <div class="users-header">
+                <div class="search-bar">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" placeholder="Search users...">
+                </div>
+                <button class="btn-primary">Add User</button>
+            </div>
+
+            <div class="users-table">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>User</th>
+                            <th>Phone Number</th>
+                            <th>Messages</th>
+                            <th>Last Active</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTableBody">
+                        <!-- Users will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- AI Config Page -->
+        <div id="ai-config-page" class="page">
+            <div class="ai-config-container">
+                <div class="config-section">
+                    <h3>AI Model Settings</h3>
+                    <div class="form-group">
+                        <label>AI Model</label>
+                        <select class="form-control">
+                            <option>Claude Sonnet 4 (Recommended)</option>
+                            <option>Claude Opus 4</option>
+                            <option>Claude Haiku 4</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Max Response Length</label>
+                        <input type="range" min="100" max="2000" value="1000" class="range-slider">
+                        <div class="range-value">1000 tokens</div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Response Temperature</label>
+                        <input type="range" min="0" max="100" value="70" class="range-slider">
+                        <div class="range-value">0.7 (Balanced)</div>
+                    </div>
+                </div>
+
+                <div class="config-section">
+                    <h3>System Prompt</h3>
+                    <textarea class="system-prompt" rows="10" placeholder="Enter system prompt...">You are a helpful WhatsApp AI assistant. Be friendly, concise, and clear in your responses. Keep answers suitable for WhatsApp chat format - not too long. Use emojis occasionally to make conversations friendly.</textarea>
+                    <button class="btn-primary" style="margin-top: 15px;">Save Prompt</button>
+                </div>
+
+                <div class="config-section">
+                    <h3>Test AI Response</h3>
+                    <div class="test-container">
+                        <input type="text" class="form-control" placeholder="Type a test message..." id="testInput">
+                        <button class="btn-primary" onclick="testAI()">Test</button>
+                    </div>
+                    <div class="test-response" id="testResponse" style="display: none;">
+                        <strong>AI Response:</strong>
+                        <p id="testResponseText"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>

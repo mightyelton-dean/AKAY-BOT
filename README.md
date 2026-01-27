@@ -1,32 +1,15 @@
-# AKAY Bot Dashboard
+# AKAY Bot - Professional WhatsApp Automation Platform
 
-A professional WhatsApp automation platform dashboard built with modern web technologies.
+Complete WhatsApp automation dashboard with AI-powered responses.
 
 ## Features
+- **WhatsApp Connection** - QR code scanning to link your account
+- **Live Dashboard** - Real-time metrics and analytics
+- **Conversation Management** - View and respond to all messages
+- **Contact Management** - Import, organize contacts
+- **Broadcast Messages** - Send bulk messages
+- **Automation Rules** - Set up auto-responses and triggers
+- **Message Templates** - Reusable message templates
+- **AI Configuration** - Customize AI behavior
 
-- **Real-time monitoring** - Track bot performance and message volume
-- **User management** - Monitor active users and conversations
-- **Analytics dashboard** - Visual insights with charts and metrics
-- **AI configuration** - Customize bot behavior and responses
-- **Professional UI** - Clean, modern interface inspired by enterprise products
-
-## Tech Stack
-
-- Pure HTML5, CSS3, JavaScript
-- Canvas API for charts
-- Responsive design
-- No external dependencies required
-
-## Deployment
-
-Deploy to Vercel:
-
-```bash
-vercel
-```
-
-Or push to GitHub and connect to Vercel for automatic deployments.
-
-## License
-
-© 2026 EltonDeanTech. All rights reserved.
+© 2026 EltonDeanTech

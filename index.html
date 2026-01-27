@@ -8,7 +8,6 @@
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="logo">
@@ -19,16 +18,21 @@
                 <span>AKAY</span>
             </div>
         </div>
-
         <nav class="nav">
-            <a href="#" class="nav-item active" data-page="overview">
+            <a href="#" class="nav-item" data-page="connect">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
                     <rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
                     <rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
                     <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
                 </svg>
-                <span>Overview</span>
+                <span>Connect WhatsApp</span>
+            </a>
+            <a href="#" class="nav-item active" data-page="overview">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M3 14L7 10L11 14L17 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                <span>Dashboard</span>
             </a>
             <a href="#" class="nav-item" data-page="conversations">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -36,28 +40,40 @@
                 </svg>
                 <span>Conversations</span>
             </a>
-            <a href="#" class="nav-item" data-page="analytics">
+            <a href="#" class="nav-item" data-page="contacts">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M3 14L7 10L11 14L17 8M17 8V12M17 8H13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M4 17C4 13.686 6.68629 11 10 11C13.3137 11 16 13.686 16 17" stroke="currentColor" stroke-width="1.5"/>
                 </svg>
-                <span>Analytics</span>
+                <span>Contacts</span>
             </a>
-            <a href="#" class="nav-item" data-page="users">
+            <a href="#" class="nav-item" data-page="broadcast">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <circle cx="10" cy="7" r="3.5" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M4 17C4 13.134 6.68629 10 10 10C13.3137 10 16 13.134 16 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M2 10H6L10 3L14 17L18 10H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
                 </svg>
-                <span>Users</span>
+                <span>Broadcast</span>
+            </a>
+            <a href="#" class="nav-item" data-page="automation">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <path d="M13 7L17 10L13 13M7 7L3 10L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>Automation</span>
+            </a>
+            <a href="#" class="nav-item" data-page="templates">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
+                    <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
+                    <path d="M7 8H13M7 11H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                </svg>
+                <span>Templates</span>
             </a>
             <a href="#" class="nav-item" data-page="settings">
                 <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                     <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M10 2V4M10 16V18M4.93 4.93L6.34 6.34M13.66 13.66L15.07 15.07M2 10H4M16 10H18M4.93 15.07L6.34 13.66M13.66 6.34L15.07 4.93" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+                    <path d="M10 2V4M10 16V18M4.93 4.93L6.34 6.34M13.66 13.66L15.07 15.07M2 10H4M16 10H18M4.93 15.07L6.34 13.66M13.66 6.34L15.07 4.93" stroke="currentColor" stroke-width="1.5"/>
                 </svg>
                 <span>Settings</span>
             </a>
         </nav>
-
         <div class="sidebar-footer">
             <div class="user-info">
                 <div class="avatar">ED</div>
@@ -69,24 +85,16 @@
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
-        <!-- Header -->
         <header class="header">
             <div class="header-left">
-                <h1 class="page-title">Overview</h1>
-                <div class="status-badge online">
+                <h1 class="page-title">Dashboard</h1>
+                <div class="status-badge disconnected" id="connectionStatus">
                     <span class="status-dot"></span>
-                    Bot Online
+                    <span id="statusText">Disconnected</span>
                 </div>
             </div>
             <div class="header-right">
-                <button class="btn-icon">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M10 5V10L13 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        <circle cx="10" cy="10" r="7.5" stroke="currentColor" stroke-width="1.5"/>
-                    </svg>
-                </button>
                 <button class="btn-icon notification">
                     <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
                         <path d="M8 17H12M10 2V3M10 3C7.79086 3 6 4.79086 6 7V10L4 12V13H16V12L14 10V7C14 4.79086 12.2091 3 10 3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
@@ -96,303 +104,200 @@
             </div>
         </header>
 
-        <!-- Content Pages -->
-        <div class="content" id="overview-page">
-            <!-- Stats Grid -->
-            <div class="stats-grid">
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-label">Total Messages</span>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M3 5.5C3 4.11929 4.11929 3 5.5 3H14.5C15.8807 3 17 4.11929 17 5.5V11.5C17 12.8807 15.8807 14 14.5 14H7L3 17V5.5Z" stroke="currentColor" stroke-width="1.5"/>
+        <div class="content" id="connect-page" style="display:none;">
+            <div class="connect-card">
+                <div class="qr-section">
+                    <h2>Connect Your WhatsApp</h2>
+                    <p>Scan the QR code with WhatsApp to link your account</p>
+                    <div class="qr-code" id="qrCode">
+                        <svg width="200" height="200" viewBox="0 0 200 200">
+                            <rect x="20" y="20" width="60" height="60" fill="currentColor"/>
+                            <rect x="120" y="20" width="60" height="60" fill="currentColor"/>
+                            <rect x="20" y="120" width="60" height="60" fill="currentColor"/>
+                            <rect x="40" y="40" width="20" height="20" fill="white"/>
+                            <rect x="140" y="40" width="20" height="20" fill="white"/>
+                            <rect x="40" y="140" width="20" height="20" fill="white"/>
                         </svg>
                     </div>
-                    <div class="stat-value">1,247</div>
-                    <div class="stat-change positive">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M6 9V3M6 3L3 6M6 3L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        12% from last week
-                    </div>
+                    <button class="btn-primary btn-large" onclick="generateQR()">Generate QR Code</button>
                 </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-label">Active Users</span>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/>
-                            <path d="M4 17C4 13.686 6.68629 11 10 11C13.3137 11 16 13.686 16 17" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                        </svg>
-                    </div>
-                    <div class="stat-value">89</div>
-                    <div class="stat-change positive">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M6 9V3M6 3L3 6M6 3L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        23% from last week
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-label">Response Time</span>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M10 5V10L13 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
-                        </svg>
-                    </div>
-                    <div class="stat-value">1.2s</div>
-                    <div class="stat-change positive">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M6 3V9M6 9L3 6M6 9L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        0.3s faster
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-label">Success Rate</span>
-                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M6 10L9 13L14 7" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                            <circle cx="10" cy="10" r="7" stroke="currentColor" stroke-width="1.5"/>
-                        </svg>
-                    </div>
-                    <div class="stat-value">94%</div>
-                    <div class="stat-change positive">
-                        <svg width="12" height="12" viewBox="0 0 12 12" fill="none">
-                            <path d="M6 9V3M6 3L3 6M6 3L9 6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                        </svg>
-                        5% improvement
-                    </div>
-                </div>
-            </div>
-
-            <!-- Charts Row -->
-            <div class="charts-row">
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h2>Message Volume</h2>
-                        <div class="chart-controls">
-                            <button class="chart-tab active">7D</button>
-                            <button class="chart-tab">30D</button>
-                            <button class="chart-tab">90D</button>
-                        </div>
-                    </div>
-                    <canvas id="messageChart"></canvas>
-                </div>
-
-                <div class="chart-card">
-                    <div class="chart-header">
-                        <h2>Response Distribution</h2>
-                        <select class="chart-select">
-                            <option>Today</option>
-                            <option>This Week</option>
-                            <option>This Month</option>
-                        </select>
-                    </div>
-                    <canvas id="responseChart"></canvas>
-                </div>
-            </div>
-
-            <!-- Recent Activity -->
-            <div class="activity-section">
-                <div class="section-header">
-                    <h2>Recent Conversations</h2>
-                    <button class="btn-secondary">View All</button>
-                </div>
-                <div class="table-container">
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th>User</th>
-                                <th>Message</th>
-                                <th>Time</th>
-                                <th>Status</th>
-                                <th></th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="avatar">JD</div>
-                                        <span>John Doe</span>
-                                    </div>
-                                </td>
-                                <td class="message-preview">What are your business hours?</td>
-                                <td class="time-cell">2 min ago</td>
-                                <td><span class="badge success">Resolved</span></td>
-                                <td>
-                                    <button class="btn-icon-small">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                            <path d="M8 4V12M12 8H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="avatar">SM</div>
-                                        <span>Sarah Miller</span>
-                                    </div>
-                                </td>
-                                <td class="message-preview">How can I track my order?</td>
-                                <td class="time-cell">5 min ago</td>
-                                <td><span class="badge success">Resolved</span></td>
-                                <td>
-                                    <button class="btn-icon-small">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                            <path d="M8 4V12M12 8H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="avatar">RP</div>
-                                        <span>Robert Park</span>
-                                    </div>
-                                </td>
-                                <td class="message-preview">Do you offer international shipping?</td>
-                                <td class="time-cell">12 min ago</td>
-                                <td><span class="badge pending">In Progress</span></td>
-                                <td>
-                                    <button class="btn-icon-small">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                            <path d="M8 4V12M12 8H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="avatar">LW</div>
-                                        <span>Lisa Wang</span>
-                                    </div>
-                                </td>
-                                <td class="message-preview">What payment methods do you accept?</td>
-                                <td class="time-cell">18 min ago</td>
-                                <td><span class="badge success">Resolved</span></td>
-                                <td>
-                                    <button class="btn-icon-small">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                            <path d="M8 4V12M12 8H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>
-                                    <div class="user-cell">
-                                        <div class="avatar">MC</div>
-                                        <span>Mike Chen</span>
-                                    </div>
-                                </td>
-                                <td class="message-preview">Is there a warranty on products?</td>
-                                <td class="time-cell">25 min ago</td>
-                                <td><span class="badge success">Resolved</span></td>
-                                <td>
-                                    <button class="btn-icon-small">
-                                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                            <path d="M8 4V12M12 8H4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                                        </svg>
-                                    </button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
+                <div class="instructions">
+                    <h3>How to connect:</h3>
+                    <ol>
+                        <li>Open WhatsApp on your phone</li>
+                        <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
+                        <li>Tap <strong>Link a Device</strong></li>
+                        <li>Scan the QR code above</li>
+                    </ol>
                 </div>
             </div>
         </div>
 
-        <!-- Settings Page -->
-        <div class="content" id="settings-page" style="display: none;">
-            <div class="settings-grid">
-                <div class="settings-card">
-                    <h2>Bot Configuration</h2>
-                    <div class="settings-group">
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <label>Auto Reply</label>
-                                <p>Automatically respond to incoming messages</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <label>Context Memory</label>
-                                <p>Remember previous conversation context</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
-                        <div class="setting-item">
-                            <div class="setting-info">
-                                <label>Typing Indicators</label>
-                                <p>Show typing status when generating responses</p>
-                            </div>
-                            <label class="toggle">
-                                <input type="checkbox" checked>
-                                <span class="toggle-slider"></span>
-                            </label>
-                        </div>
+        <div class="content" id="overview-page">
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Total Messages</span>
                     </div>
+                    <div class="stat-value">1,247</div>
+                    <div class="stat-change positive">↑ 12% from last week</div>
                 </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Active Users</span>
+                    </div>
+                    <div class="stat-value">89</div>
+                    <div class="stat-change positive">↑ 23% from last week</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Response Time</span>
+                    </div>
+                    <div class="stat-value">1.2s</div>
+                    <div class="stat-change positive">↓ 0.3s faster</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-header">
+                        <span class="stat-label">Success Rate</span>
+                    </div>
+                    <div class="stat-value">94%</div>
+                    <div class="stat-change positive">↑ 5% improvement</div>
+                </div>
+            </div>
 
-                <div class="settings-card">
-                    <h2>Connection</h2>
-                    <div class="connection-status">
-                        <div class="connection-info">
-                            <div class="connection-badge connected">
-                                <span class="status-dot"></span>
-                                WhatsApp Connected
-                            </div>
-                            <div class="connection-details">
-                                <p><strong>Bot Number:</strong> +234 705 680 7197</p>
-                                <p><strong>Last Active:</strong> Just now</p>
-                            </div>
-                        </div>
-                        <button class="btn-danger">Disconnect</button>
+            <div class="chart-card">
+                <div class="chart-header">
+                    <h2>Message Activity</h2>
+                    <div class="chart-controls">
+                        <button class="chart-tab active">7D</button>
+                        <button class="chart-tab">30D</button>
+                        <button class="chart-tab">90D</button>
                     </div>
                 </div>
+                <canvas id="messageChart"></canvas>
+            </div>
+        </div>
 
-                <div class="settings-card full-width">
-                    <h2>AI Model Configuration</h2>
-                    <div class="model-config">
-                        <div class="form-group">
-                            <label>AI Model</label>
-                            <select class="form-control">
-                                <option>Claude Sonnet 4 (Recommended)</option>
-                                <option>Claude Opus 4</option>
-                                <option>Claude Haiku 4</option>
-                            </select>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Max Response Length</label>
-                                <input type="number" class="form-control" value="1000" placeholder="tokens">
-                            </div>
-                            <div class="form-group">
-                                <label>Temperature</label>
-                                <input type="number" class="form-control" value="0.7" step="0.1" min="0" max="1">
-                            </div>
-                        </div>
-                        <div class="form-group">
-                            <label>System Prompt</label>
-                            <textarea class="form-control" rows="6">You are a helpful WhatsApp AI assistant. Be friendly, concise, and clear in your responses. Keep answers suitable for WhatsApp chat format - not too long. Use emojis occasionally to make conversations friendly.</textarea>
-                        </div>
-                        <button class="btn-primary">Save Configuration</button>
+        <div class="content" id="conversations-page" style="display:none;">
+            <div class="page-header">
+                <h2>Conversations</h2>
+                <div class="search-box">
+                    <input type="text" placeholder="Search conversations...">
+                </div>
+            </div>
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="2"/>
+                    <path d="M20 28H44M20 36H36" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <h3>No conversations yet</h3>
+                <p>Connect WhatsApp to start receiving messages</p>
+            </div>
+        </div>
+
+        <div class="content" id="contacts-page" style="display:none;">
+            <div class="page-header">
+                <h2>Contacts</h2>
+                <div class="page-actions">
+                    <button class="btn-secondary">Import CSV</button>
+                    <button class="btn-primary">Add Contact</button>
+                </div>
+            </div>
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
+                    <circle cx="32" cy="24" r="10" stroke="currentColor" stroke-width="2"/>
+                    <path d="M12 54C12 44 20 36 32 36C44 36 52 44 52 54" stroke="currentColor" stroke-width="2"/>
+                </svg>
+                <h3>No contacts yet</h3>
+                <p>Add contacts manually or import from CSV</p>
+            </div>
+        </div>
+
+        <div class="content" id="broadcast-page" style="display:none;">
+            <div class="broadcast-container">
+                <div class="form-section">
+                    <h2>Send Broadcast</h2>
+                    <div class="form-group">
+                        <label>Recipients</label>
+                        <select class="form-control">
+                            <option>All Contacts (247)</option>
+                            <option>Active Users (89)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Message</label>
+                        <textarea class="form-control" rows="8" placeholder="Type your message..."></textarea>
+                    </div>
+                    <button class="btn-primary btn-large">Send Broadcast</button>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="automation-page" style="display:none;">
+            <div class="page-header">
+                <h2>Automation Rules</h2>
+                <button class="btn-primary">Create Rule</button>
+            </div>
+            <div class="automation-grid">
+                <div class="automation-card">
+                    <div class="automation-header">
+                        <h3>Welcome Message</h3>
+                        <label class="toggle">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p>Send automated welcome to new contacts</p>
+                    <div class="automation-stats">47 triggers today</div>
+                </div>
+                <div class="automation-card">
+                    <div class="automation-header">
+                        <h3>Business Hours</h3>
+                        <label class="toggle">
+                            <input type="checkbox" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                    </div>
+                    <p>Auto-reply outside business hours</p>
+                    <div class="automation-stats">12 triggers today</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="content" id="templates-page" style="display:none;">
+            <div class="page-header">
+                <h2>Message Templates</h2>
+                <button class="btn-primary">New Template</button>
+            </div>
+            <div class="templates-grid">
+                <div class="template-card">
+                    <h3>Order Confirmation</h3>
+                    <p class="template-preview">Thank you for your order! Your order #{order_id}...</p>
+                    <div class="template-footer">
+                        <span>Used 247 times</span>
+                        <button class="btn-secondary btn-sm">Edit</button>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <div class="content" id="settings-page" style="display:none;">
+            <h2>Settings</h2>
+            <div class="settings-card">
+                <h3>AI Configuration</h3>
+                <div class="form-group">
+                    <label>AI Model</label>
+                    <select class="form-control">
+                        <option>Claude Sonnet 4</option>
+                        <option>Claude Opus 4</option>
+                        <option>GPT-4</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>System Prompt</label>
+                    <textarea class="form-control" rows="6">You are a helpful WhatsApp AI assistant...</textarea>
+                </div>
+                <button class="btn-primary">Save Settings</button>
             </div>
         </div>
     </main>

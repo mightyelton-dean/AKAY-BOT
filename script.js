@@ -1,341 +1,289 @@
 // Page Navigation
-function showPage(pageName) {
-    // Hide all pages
-    document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
-    });
-    
-    // Show selected page
-    document.getElementById(pageName + '-page').classList.add('active');
-    
-    // Update nav items
-    document.querySelectorAll('.nav-item').forEach(item => {
-        item.classList.remove('active');
-    });
-    event.target.closest('.nav-item').classList.add('active');
-    
-    // Update page title
-    const titles = {
-        'overview': 'Dashboard Overview',
-        'conversations': 'Conversations',
-        'analytics': 'Analytics',
-        'settings': 'Settings',
-        'users': 'User Management',
-        'ai-config': 'AI Configuration'
-    };
-    document.getElementById('pageTitle').textContent = titles[pageName];
-}
-
-// Toggle Sidebar (Mobile)
-function toggleSidebar() {
-    document.getElementById('sidebar').classList.toggle('active');
-}
-
-// Populate Recent Activity
-function populateActivity() {
-    const activities = [
-        { name: 'John Doe', message: 'What are your business hours?', time: '2 minutes ago', avatar: 'JD' },
-        { name: 'Sarah Smith', message: 'I need help with my order', time: '5 minutes ago', avatar: 'SS' },
-        { name: 'Mike Johnson', message: 'Can I get a refund?', time: '12 minutes ago', avatar: 'MJ' },
-        { name: 'Emma Wilson', message: 'Thank you for the quick response!', time: '18 minutes ago', avatar: 'EW' },
-        { name: 'David Lee', message: 'Is this product available?', time: '25 minutes ago', avatar: 'DL' }
-    ];
-
-    const activityList = document.getElementById('activityList');
-    activities.forEach(activity => {
-        const item = document.createElement('div');
-        item.className = 'activity-item';
-        item.innerHTML = `
-            <div class="activity-avatar">${activity.avatar}</div>
-            <div class="activity-content">
-                <div class="activity-name">${activity.name}</div>
-                <div class="activity-message">${activity.message}</div>
-                <div class="activity-time">${activity.time}</div>
-            </div>
-        `;
-        activityList.appendChild(item);
-    });
-}
-
-// Populate Conversations
-function populateConversations() {
-    const conversations = [
-        { name: 'Akay Ibrahim', phone: '+234 915 529 8855', preview: 'Thank you for the information!', time: '10:23 AM', count: 2, avatar: 'AI' },
-        { name: 'John Doe', phone: '+1 234 567 8900', preview: 'What are your business hours?', time: '10:15 AM', count: 1, avatar: 'JD' },
-        { name: 'Sarah Smith', phone: '+44 20 7946 0958', preview: 'I need help with my order #1234', time: '09:47 AM', count: 3, avatar: 'SS' },
-        { name: 'Mike Johnson', phone: '+1 555 123 4567', preview: 'Can I get a refund for my purchase?', time: '09:32 AM', count: 0, avatar: 'MJ' },
-        { name: 'Emma Wilson', phone: '+61 2 9374 4000', preview: 'The bot is really helpful, thanks!', time: '08:15 AM', count: 0, avatar: 'EW' },
-        { name: 'David Lee', phone: '+82 2 3771 0000', preview: 'Is the product still in stock?', time: 'Yesterday', count: 1, avatar: 'DL' },
-        { name: 'Lisa Chen', phone: '+86 10 8532 1234', preview: 'How long does shipping take?', time: 'Yesterday', count: 0, avatar: 'LC' },
-        { name: 'Tom Brown', phone: '+49 30 2639 0', preview: 'I love this service!', time: 'Yesterday', count: 0, avatar: 'TB' }
-    ];
-
-    const conversationsGrid = document.getElementById('conversationsGrid');
-    conversations.forEach(conv => {
-        const card = document.createElement('div');
-        card.className = 'conversation-card';
-        card.innerHTML = `
-            <div class="conversation-avatar">${conv.avatar}</div>
-            <div class="conversation-details">
-                <div class="conversation-name">${conv.name}</div>
-                <div class="conversation-preview">${conv.preview}</div>
-            </div>
-            <div class="conversation-meta">
-                <div class="conversation-time">${conv.time}</div>
-                ${conv.count > 0 ? `<span class="message-count">${conv.count}</span>` : ''}
-            </div>
-        `;
-        conversationsGrid.appendChild(card);
-    });
-}
-
-// Filter Conversations
-function filterConversations() {
-    const searchTerm = document.getElementById('searchInput').value.toLowerCase();
-    const cards = document.querySelectorAll('.conversation-card');
-    
-    cards.forEach(card => {
-        const name = card.querySelector('.conversation-name').textContent.toLowerCase();
-        const preview = card.querySelector('.conversation-preview').textContent.toLowerCase();
+document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', (e) => {
+        e.preventDefault();
         
-        if (name.includes(searchTerm) || preview.includes(searchTerm)) {
-            card.style.display = 'flex';
+        // Update active nav item
+        document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+        item.classList.add('active');
+        
+        // Update page title
+        const pageTitle = item.querySelector('span').textContent;
+        document.querySelector('.page-title').textContent = pageTitle;
+        
+        // Show/hide pages
+        const page = item.dataset.page;
+        document.querySelectorAll('.content').forEach(content => {
+            content.style.display = 'none';
+        });
+        
+        if (page === 'settings') {
+            document.getElementById('settings-page').style.display = 'block';
         } else {
-            card.style.display = 'none';
+            document.getElementById('overview-page').style.display = 'block';
         }
     });
+});
+
+// Initialize Charts
+function initCharts() {
+    // Message Volume Chart
+    const messageCtx = document.getElementById('messageChart');
+    if (messageCtx) {
+        const ctx = messageCtx.getContext('2d');
+        
+        // Generate gradient
+        const gradient = ctx.createLinearGradient(0, 0, 0, 200);
+        gradient.addColorStop(0, 'rgba(10, 10, 10, 0.1)');
+        gradient.addColorStop(1, 'rgba(10, 10, 10, 0)');
+        
+        // Sample data
+        const data = {
+            labels: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+            values: [145, 189, 167, 203, 178, 156, 234]
+        };
+        
+        drawLineChart(ctx, data, gradient);
+    }
+    
+    // Response Distribution Chart
+    const responseCtx = document.getElementById('responseChart');
+    if (responseCtx) {
+        const ctx = responseCtx.getContext('2d');
+        
+        const data = {
+            labels: ['Resolved', 'In Progress', 'Pending'],
+            values: [847, 142, 89],
+            colors: ['#16a34a', '#ea580c', '#a3a3a3']
+        };
+        
+        drawDoughnutChart(ctx, data);
+    }
 }
 
-// Populate Users Table
-function populateUsers() {
-    const users = [
-        { name: 'Akay Ibrahim', phone: '+234 915 529 8855', messages: 45, lastActive: '5 mins ago', status: 'Active', avatar: 'AI' },
-        { name: 'John Doe', phone: '+1 234 567 8900', messages: 32, lastActive: '12 mins ago', status: 'Active', avatar: 'JD' },
-        { name: 'Sarah Smith', phone: '+44 20 7946 0958', messages: 28, lastActive: '1 hour ago', status: 'Active', avatar: 'SS' },
-        { name: 'Mike Johnson', phone: '+1 555 123 4567', messages: 21, lastActive: '3 hours ago', status: 'Inactive', avatar: 'MJ' },
-        { name: 'Emma Wilson', phone: '+61 2 9374 4000', messages: 19, lastActive: '5 hours ago', status: 'Inactive', avatar: 'EW' },
-        { name: 'David Lee', phone: '+82 2 3771 0000', messages: 15, lastActive: 'Yesterday', status: 'Inactive', avatar: 'DL' }
-    ];
-
-    const tbody = document.getElementById('usersTableBody');
-    users.forEach(user => {
-        const row = document.createElement('tr');
-        row.innerHTML = `
-            <td>
-                <div class="user-cell">
-                    <div class="table-avatar">${user.avatar}</div>
-                    <span>${user.name}</span>
-                </div>
-            </td>
-            <td>${user.phone}</td>
-            <td>${user.messages}</td>
-            <td>${user.lastActive}</td>
-            <td>
-                <span class="status-dot-table ${user.status === 'Active' ? 'active' : 'inactive'}"></span>
-                ${user.status}
-            </td>
-            <td>
-                <button class="action-btn">View</button>
-                <button class="action-btn">Edit</button>
-            </td>
-        `;
-        tbody.appendChild(row);
+// Line Chart Drawing
+function drawLineChart(ctx, data, gradient) {
+    const canvas = ctx.canvas;
+    const width = canvas.width;
+    const height = canvas.height;
+    const padding = 40;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Calculate dimensions
+    const chartWidth = width - (padding * 2);
+    const chartHeight = height - (padding * 2);
+    const maxValue = Math.max(...data.values);
+    const step = chartWidth / (data.labels.length - 1);
+    
+    // Draw grid lines
+    ctx.strokeStyle = '#e5e5e5';
+    ctx.lineWidth = 1;
+    for (let i = 0; i <= 4; i++) {
+        const y = padding + (chartHeight / 4) * i;
+        ctx.beginPath();
+        ctx.moveTo(padding, y);
+        ctx.lineTo(width - padding, y);
+        ctx.stroke();
+    }
+    
+    // Calculate points
+    const points = data.values.map((value, index) => ({
+        x: padding + (step * index),
+        y: padding + chartHeight - (value / maxValue) * chartHeight
+    }));
+    
+    // Draw area under line
+    ctx.fillStyle = gradient;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, height - padding);
+    points.forEach(point => ctx.lineTo(point.x, point.y));
+    ctx.lineTo(points[points.length - 1].x, height - padding);
+    ctx.closePath();
+    ctx.fill();
+    
+    // Draw line
+    ctx.strokeStyle = '#0a0a0a';
+    ctx.lineWidth = 2;
+    ctx.beginPath();
+    ctx.moveTo(points[0].x, points[0].y);
+    points.forEach(point => ctx.lineTo(point.x, point.y));
+    ctx.stroke();
+    
+    // Draw points
+    points.forEach(point => {
+        ctx.fillStyle = '#0a0a0a';
+        ctx.beginPath();
+        ctx.arc(point.x, point.y, 4, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    });
+    
+    // Draw labels
+    ctx.fillStyle = '#737373';
+    ctx.font = '12px IBM Plex Sans';
+    ctx.textAlign = 'center';
+    data.labels.forEach((label, index) => {
+        ctx.fillText(label, padding + (step * index), height - padding + 20);
     });
 }
 
-// Test AI Response
+// Doughnut Chart Drawing
+function drawDoughnutChart(ctx, data) {
+    const canvas = ctx.canvas;
+    const width = canvas.width;
+    const height = canvas.height;
+    const centerX = width / 2;
+    const centerY = height / 2;
+    const radius = Math.min(width, height) / 2 - 40;
+    const innerRadius = radius * 0.6;
+    
+    // Clear canvas
+    ctx.clearRect(0, 0, width, height);
+    
+    // Calculate total
+    const total = data.values.reduce((sum, val) => sum + val, 0);
+    
+    // Draw segments
+    let currentAngle = -Math.PI / 2;
+    data.values.forEach((value, index) => {
+        const sliceAngle = (value / total) * Math.PI * 2;
+        
+        // Draw outer arc
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
+        ctx.arc(centerX, centerY, innerRadius, currentAngle + sliceAngle, currentAngle, true);
+        ctx.closePath();
+        ctx.fillStyle = data.colors[index];
+        ctx.fill();
+        
+        currentAngle += sliceAngle;
+    });
+    
+    // Draw center circle
+    ctx.beginPath();
+    ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+    ctx.fillStyle = '#ffffff';
+    ctx.fill();
+    
+    // Draw total in center
+    ctx.fillStyle = '#0a0a0a';
+    ctx.font = 'bold 28px JetBrains Mono';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillText(total, centerX, centerY - 10);
+    
+    ctx.font = '13px IBM Plex Sans';
+    ctx.fillStyle = '#737373';
+    ctx.fillText('Total', centerX, centerY + 15);
+    
+    // Draw legend
+    let legendY = height - 80;
+    data.labels.forEach((label, index) => {
+        // Color box
+        ctx.fillStyle = data.colors[index];
+        ctx.fillRect(20, legendY, 12, 12);
+        
+        // Label
+        ctx.fillStyle = '#0a0a0a';
+        ctx.font = '13px IBM Plex Sans';
+        ctx.textAlign = 'left';
+        ctx.fillText(`${label}: ${data.values[index]}`, 40, legendY + 10);
+        
+        legendY += 20;
+    });
+}
+
+// Chart Tab Controls
+document.querySelectorAll('.chart-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+        // Remove active from all tabs in the same group
+        tab.parentElement.querySelectorAll('.chart-tab').forEach(t => t.classList.remove('active'));
+        tab.classList.add('active');
+        
+        // In a real app, you would load different data here
+        console.log('Loading data for:', tab.textContent);
+    });
+});
+
+// Toggle Switches
+document.querySelectorAll('.toggle input').forEach(toggle => {
+    toggle.addEventListener('change', (e) => {
+        const label = e.target.closest('.setting-item').querySelector('label').textContent;
+        console.log(`${label} is now ${e.target.checked ? 'enabled' : 'disabled'}`);
+    });
+});
+
+// Test AI Function
 function testAI() {
-    const input = document.getElementById('testInput').value;
+    const input = document.getElementById('testInput');
     const responseDiv = document.getElementById('testResponse');
     const responseText = document.getElementById('testResponseText');
     
-    if (!input) {
-        alert('Please enter a test message');
-        return;
+    if (input && input.value.trim()) {
+        responseDiv.style.display = 'block';
+        responseText.textContent = 'Processing your request...';
+        
+        // Simulate AI response
+        setTimeout(() => {
+            responseText.textContent = `This is a test response to: "${input.value}". In production, this would connect to your AI model.`;
+        }, 1000);
     }
-    
-    // Simulate AI response
-    responseDiv.style.display = 'block';
-    responseText.textContent = 'Generating response...';
-    
-    setTimeout(() => {
-        const responses = [
-            "Hello! I'm here to help you. How can I assist you today? 😊",
-            "That's a great question! Let me provide you with detailed information about that...",
-            "I'd be happy to help! Based on your question, here's what I can tell you...",
-            "Thank you for reaching out! I can definitely assist with that. Here's what you need to know...",
-            "Great to hear from you! Let me help you with that right away. 🚀"
-        ];
-        const randomResponse = responses[Math.floor(Math.random() * responses.length)];
-        responseText.textContent = randomResponse;
-    }, 1500);
 }
 
-// Animate Counters
-function animateCounter(element, target, duration = 2000) {
-    let start = 0;
-    const increment = target / (duration / 16);
+// Initialize on load
+window.addEventListener('load', () => {
+    initCharts();
+    
+    // Add resize handler to redraw charts
+    let resizeTimeout;
+    window.addEventListener('resize', () => {
+        clearTimeout(resizeTimeout);
+        resizeTimeout = setTimeout(() => {
+            initCharts();
+        }, 250);
+    });
+});
+
+// Real-time updates simulation
+function simulateRealTimeUpdates() {
+    setInterval(() => {
+        // Update random stat (just for demo)
+        const statValues = document.querySelectorAll('.stat-value');
+        if (statValues.length > 0) {
+            const randomStat = statValues[Math.floor(Math.random() * statValues.length)];
+            const currentValue = parseInt(randomStat.textContent.replace(/[^0-9]/g, ''));
+            const change = Math.floor(Math.random() * 5) - 2;
+            const newValue = Math.max(0, currentValue + change);
+            
+            // Animate value change
+            animateValue(randomStat, currentValue, newValue, 500);
+        }
+    }, 10000); // Update every 10 seconds
+}
+
+function animateValue(element, start, end, duration) {
+    const range = end - start;
+    const increment = range / (duration / 16);
+    let current = start;
     
     const timer = setInterval(() => {
-        start += increment;
-        if (start >= target) {
-            element.textContent = target;
+        current += increment;
+        if ((increment > 0 && current >= end) || (increment < 0 && current <= end)) {
+            element.textContent = formatStatValue(end);
             clearInterval(timer);
         } else {
-            element.textContent = Math.floor(start);
+            element.textContent = formatStatValue(Math.floor(current));
         }
     }, 16);
 }
 
-// Create Activity Chart
-function createActivityChart() {
-    const canvas = document.getElementById('activityChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    
-    // Simple bar chart
-    const data = [45, 62, 38, 71, 56, 83, 67];
-    const labels = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
-    const barWidth = canvas.width / (data.length * 2);
-    const maxValue = Math.max(...data);
-    
-    ctx.fillStyle = '#e2e8f0';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-    
-    data.forEach((value, index) => {
-        const barHeight = (value / maxValue) * (canvas.height - 40);
-        const x = (index * 2 + 1) * barWidth;
-        const y = canvas.height - barHeight - 20;
-        
-        // Gradient
-        const gradient = ctx.createLinearGradient(0, y, 0, canvas.height);
-        gradient.addColorStop(0, '#25d366');
-        gradient.addColorStop(1, '#128c7e');
-        
-        ctx.fillStyle = gradient;
-        ctx.fillRect(x, y, barWidth * 0.8, barHeight);
-        
-        // Label
-        ctx.fillStyle = '#64748b';
-        ctx.font = '12px Inter';
-        ctx.textAlign = 'center';
-        ctx.fillText(labels[index], x + barWidth * 0.4, canvas.height - 5);
-    });
+function formatStatValue(value) {
+    return value.toLocaleString();
 }
 
-// Create Engagement Chart
-function createEngagementChart() {
-    const canvas = document.getElementById('engagementChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 30;
-    
-    const data = [
-        { label: 'Active', value: 65, color: '#25d366' },
-        { label: 'Returning', value: 20, color: '#128c7e' },
-        { label: 'New', value: 15, color: '#075e54' }
-    ];
-    
-    let startAngle = -0.5 * Math.PI;
-    
-    data.forEach(item => {
-        const sliceAngle = (item.value / 100) * 2 * Math.PI;
-        
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
-        ctx.lineTo(centerX, centerY);
-        ctx.fillStyle = item.color;
-        ctx.fill();
-        
-        startAngle += sliceAngle;
-    });
-    
-    // Center circle
-    ctx.beginPath();
-    ctx.arc(centerX, centerY, radius * 0.6, 0, 2 * Math.PI);
-    ctx.fillStyle = '#ffffff';
-    ctx.fill();
-    
-    // Center text
-    ctx.fillStyle = '#1e293b';
-    ctx.font = 'bold 24px Inter';
-    ctx.textAlign = 'center';
-    ctx.textBaseline = 'middle';
-    ctx.fillText('94%', centerX, centerY - 10);
-    ctx.font = '12px Inter';
-    ctx.fillStyle = '#64748b';
-    ctx.fillText('Engaged', centerX, centerY + 15);
-}
-
-// Create Distribution Chart
-function createDistributionChart() {
-    const canvas = document.getElementById('distributionChart');
-    if (!canvas) return;
-    
-    const ctx = canvas.getContext('2d');
-    canvas.width = canvas.offsetWidth;
-    canvas.height = canvas.offsetHeight;
-    
-    const centerX = canvas.width / 2;
-    const centerY = canvas.height / 2;
-    const radius = Math.min(centerX, centerY) - 20;
-    
-    const data = [
-        { label: 'Instant (<1s)', value: 45, color: '#10b981' },
-        { label: 'Fast (1-3s)', value: 35, color: '#25d366' },
-        { label: 'Normal (3-5s)', value: 15, color: '#f59e0b' },
-        { label: 'Slow (>5s)', value: 5, color: '#ef4444' }
-    ];
-    
-    let startAngle = -0.5 * Math.PI;
-    
-    data.forEach(item => {
-        const sliceAngle = (item.value / 100) * 2 * Math.PI;
-        
-        ctx.beginPath();
-        ctx.arc(centerX, centerY, radius, startAngle, startAngle + sliceAngle);
-        ctx.lineTo(centerX, centerY);
-        ctx.fillStyle = item.color;
-        ctx.fill();
-        
-        startAngle += sliceAngle;
-    });
-}
-
-// Initialize Dashboard
-document.addEventListener('DOMContentLoaded', function() {
-    populateActivity();
-    populateConversations();
-    populateUsers();
-    
-    // Animate counters
-    setTimeout(() => {
-        const totalMessages = document.getElementById('totalMessages');
-        const activeUsers = document.getElementById('activeUsers');
-        if (totalMessages) animateCounter(totalMessages, 1247);
-        if (activeUsers) animateCounter(activeUsers, 89);
-    }, 500);
-    
-    // Create charts
-    setTimeout(() => {
-        createActivityChart();
-        createEngagementChart();
-        createDistributionChart();
-    }, 1000);
-});
-
-// Update time every minute
-setInterval(() => {
-    const now = new Date();
-    const timeElements = document.querySelectorAll('.activity-time');
-    // In a real app, you'd update these based on actual timestamps
-}, 60000);
+// Start real-time updates
+setTimeout(simulateRealTimeUpdates, 5000);

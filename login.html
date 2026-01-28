@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - AKAY Bot</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        .login-container {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--color-bg);
+            padding: 20px;
+        }
+        
+        .login-card {
+            background: var(--color-surface);
+            border: 1px solid var(--color-border);
+            border-radius: var(--radius-lg);
+            padding: 48px;
+            width: 100%;
+            max-width: 420px;
+            box-shadow: var(--shadow-lg);
+        }
+        
+        .login-header {
+            text-align: center;
+            margin-bottom: 32px;
+        }
+        
+        .login-logo {
+            display: inline-flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+        
+        .login-logo svg {
+            color: var(--color-accent);
+        }
+        
+        .login-subtitle {
+            color: var(--color-text-secondary);
+            font-size: 14px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-size: 13px;
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: var(--color-text-primary);
+        }
+        
+        .form-control {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid var(--color-border);
+            background: var(--color-surface);
+            color: var(--color-text-primary);
+            font-size: 14px;
+            border-radius: var(--radius-md);
+            font-family: inherit;
+            transition: var(--transition);
+        }
+        
+        .form-control:focus {
+            outline: none;
+            border-color: var(--color-accent);
+            box-shadow: 0 0 0 3px rgba(10, 10, 10, 0.05);
+        }
+        
+        .btn-login {
+            width: 100%;
+            padding: 14px;
+            background: var(--color-accent);
+            color: white;
+            border: none;
+            border-radius: var(--radius-md);
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: var(--transition);
+            margin-top: 24px;
+        }
+        
+        .btn-login:hover {
+            background: var(--color-accent-hover);
+        }
+        
+        .btn-login:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .error-message {
+            background: #fef2f2;
+            color: #dc2626;
+            padding: 12px;
+            border-radius: var(--radius-md);
+            font-size: 13px;
+            margin-bottom: 20px;
+            display: none;
+        }
+        
+        .error-message.show {
+            display: block;
+        }
+        
+        .remember-me {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            margin-top: 16px;
+        }
+        
+        .remember-me input {
+            cursor: pointer;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 32px;
+            padding-top: 24px;
+            border-top: 1px solid var(--color-border);
+            color: var(--color-text-secondary);
+            font-size: 13px;
+        }
+        
+        .default-credentials {
+            background: var(--color-bg);
+            padding: 16px;
+            border-radius: var(--radius-md);
+            margin-top: 24px;
+            font-size: 12px;
+        }
+        
+        .default-credentials strong {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--color-text-primary);
+        }
+        
+        .default-credentials code {
+            background: var(--color-surface);
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', monospace;
+            color: var(--color-accent);
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <div class="login-card">
+            <div class="login-header">
+                <div class="login-logo">
+                    <svg width="40" height="40" viewBox="0 0 32 32" fill="none">
+                        <rect width="32" height="32" rx="8" fill="currentColor"/>
+                        <path d="M16 8L24 12V20L16 24L8 20V12L16 8Z" fill="white"/>
+                    </svg>
+                    <span>AKAY</span>
+                </div>
+                <p class="login-subtitle">WhatsApp Automation Platform</p>
+            </div>
+            
+            <div class="error-message" id="errorMessage">
+                Invalid username or password
+            </div>
+            
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label for="username">Username</label>
+                    <input 
+                        type="text" 
+                        id="username" 
+                        class="form-control" 
+                        placeholder="Enter your username"
+                        autocomplete="username"
+                        required
+                    >
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input 
+                        type="password" 
+                        id="password" 
+                        class="form-control" 
+                        placeholder="Enter your password"
+                        autocomplete="current-password"
+                        required
+                    >
+                </div>
+                
+                <label class="remember-me">
+                    <input type="checkbox" id="rememberMe">
+                    <span>Remember me for 24 hours</span>
+                </label>
+                
+                <button type="submit" class="btn-login" id="loginBtn">
+                    Sign In
+                </button>
+            </form>
+            
+            <div class="default-credentials">
+                <strong>🔐 Default Credentials:</strong>
+                <p>Username: <code>admin</code></p>
+                <p>Password: <code>akaybot2026</code></p>
+                <p style="margin-top: 8px; font-size: 11px; color: var(--color-text-tertiary);">
+                    Change these in auth.js for production!
+                </p>
+            </div>
+            
+            <div class="login-footer">
+                © 2026 EltonDeanTech. All rights reserved.
+            </div>
+        </div>
+    </div>
+    
+    <script src="auth.js"></script>
+    <script>
+        // Redirect if already logged in
+        if (isAuthenticated()) {
+            window.location.href = 'index.html';
+        }
+        
+        function handleLogin(event) {
+            event.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const errorMessage = document.getElementById('errorMessage');
+            const loginBtn = document.getElementById('loginBtn');
+            
+            // Disable button
+            loginBtn.disabled = true;
+            loginBtn.textContent = 'Signing in...';
+            
+            // Simulate network delay
+            setTimeout(() => {
+                if (login(username, password)) {
+                    // Success
+                    window.location.href = 'index.html';
+                } else {
+                    // Failed
+                    errorMessage.classList.add('show');
+                    loginBtn.disabled = false;
+                    loginBtn.textContent = 'Sign In';
+                    
+                    // Shake animation
+                    errorMessage.style.animation = 'shake 0.3s';
+                    setTimeout(() => {
+                        errorMessage.style.animation = '';
+                    }, 300);
+                }
+            }, 500);
+        }
+        
+        // Hide error on input
+        document.getElementById('username').addEventListener('input', () => {
+            document.getElementById('errorMessage').classList.remove('show');
+        });
+        
+        document.getElementById('password').addEventListener('input', () => {
+            document.getElementById('errorMessage').classList.remove('show');
+        });
+        
+        // Add shake animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% { transform: translateX(0); }
+                25% { transform: translateX(-10px); }
+                75% { transform: translateX(10px); }
+            }
+        `;
+        document.head.appendChild(style);
+    </script>
+</body>
+</html>

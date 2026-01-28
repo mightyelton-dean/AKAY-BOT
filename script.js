@@ -117,6 +117,15 @@ function initCharts() {
 // Initialize on load
 window.addEventListener('load', () => {
     initCharts();
+    
+    // Display current user info
+    const user = getCurrentUser();
+    if (user) {
+        document.getElementById('userName').textContent = user.username;
+        // Update avatar with first letters
+        const initials = user.username.substring(0, 2).toUpperCase();
+        document.getElementById('userAvatar').textContent = initials;
+    }
 });
 
 // Resize handler

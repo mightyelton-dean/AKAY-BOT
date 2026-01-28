@@ -6,8 +6,13 @@
     <title>AKAY Bot - WhatsApp Automation Platform</title>
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <script src="auth.js"></script>
 </head>
 <body>
+    <script>
+        // Protect this page - require authentication
+        requireAuth();
+    </script>
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="logo">
@@ -76,11 +81,16 @@
         </nav>
         <div class="sidebar-footer">
             <div class="user-info">
-                <div class="avatar">ED</div>
+                <div class="avatar" id="userAvatar">ED</div>
                 <div class="user-details">
-                    <div class="user-name">EltonDean</div>
+                    <div class="user-name" id="userName">EltonDean</div>
                     <div class="user-role">Administrator</div>
                 </div>
+                <button class="btn-icon-small logout-btn" onclick="logout()" title="Logout">
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+                        <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M11 11L14 8M14 8L11 5M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                </button>
             </div>
         </div>
     </aside>

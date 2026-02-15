@@ -1,0 +1,12 @@
+{
+  "name": "akay-bot",
+  "version": "0.2.0",
+  "private": true,
+  "description": "AKAY WhatsApp AI agent backend + dashboard",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node server.js",
+    "check": "node --check server.js && node --check services/store.js && node --check services/ai.js && node --check services/whatsapp.js && node --check services/config.js && node --check script.js && node --check auth.js"
+  }
+}

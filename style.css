@@ -741,3 +741,27 @@ textarea.form-control {
 
 /* Sessions count badge */
 h2 .badge { font-size: 13px; margin-left: 8px; vertical-align: middle; }
+
+/* ── Connect Page ──────────────────────────────────────────────────────────── */
+.connect-method-row { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-top: 16px; }
+.connect-method-card { background: var(--color-bg); border: 1px solid var(--color-border); border-radius: var(--radius-lg); padding: 24px; text-align: center; transition: var(--transition); }
+.connect-method-card:hover { border-color: var(--color-accent); }
+.method-icon { font-size: 32px; margin-bottom: 8px; }
+.connect-method-card h3 { font-size: 15px; font-weight: 600; margin-bottom: 4px; }
+.connect-method-card p { font-size: 13px; color: var(--color-text-secondary); }
+
+.qr-code-wrapper { text-align: center; padding: 24px 0; }
+.qr-hint { font-size: 13px; color: var(--color-text-secondary); margin-top: 12px; max-width: 320px; margin-left: auto; margin-right: auto; }
+
+.pairing-code-display { font-family: 'JetBrains Mono', monospace; font-size: 36px; font-weight: 700; letter-spacing: 8px; background: var(--color-bg); border: 2px solid var(--color-accent); border-radius: var(--radius-lg); padding: 20px 32px; display: inline-block; margin: 16px 0; }
+
+.connect-banner { padding: 12px 16px; border-radius: var(--radius-sm); font-size: 14px; margin-bottom: 16px; }
+.connect-banner.loading { background: #fffbeb; border: 1px solid #fde68a; color: #92400e; }
+.connect-banner.error { background: #fef2f2; border: 1px solid #fecaca; color: var(--color-danger); }
+.connect-banner.success { background: var(--color-success-bg); border: 1px solid #bbf7d0; color: var(--color-success); }
+
+.instruction-block ol { margin-top: 8px; padding-left: 20px; }
+.instruction-block ol li { font-size: 13px; color: var(--color-text-secondary); margin-bottom: 4px; }
+
+.btn-danger { background: var(--color-danger); color: white; border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; transition: var(--transition); }
+.btn-danger:hover { background: #b91c1c; }

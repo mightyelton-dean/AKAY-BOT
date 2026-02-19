@@ -1,201 +1,165 @@
+// AKAY Bot Dashboard Server
+// Proxies API calls to the Baileys backend on port 3001
+// Serves the frontend dashboard on port 3000
+
 const http = require('http');
+const https = require('https');
 const fs = require('fs');
 const path = require('path');
 const { URL } = require('url');
-const { addMessage, getMessages, getStatus, setConnectionStatus } = require('./services/store');
-const { generateReply } = require('./services/ai');
-const { loadEnv } = require('./services/config');
-const { sendWhatsAppMessage, hasTwilioConfig } = require('./services/whatsapp');
 
-loadEnv();
+require('./services/config').loadEnv();
 
 const PORT = Number(process.env.PORT || 3000);
+const BACKEND_URL = process.env.BACKEND_URL || 'http://localhost:3001';
+const DASHBOARD_PASSWORD = process.env.DASHBOARD_PASSWORD || 'akaybot2026';
 const ROOT_DIR = __dirname;
-const STATIC_FILE_TYPES = {
+
+const STATIC_TYPES = {
     '.html': 'text/html; charset=utf-8',
     '.css': 'text/css; charset=utf-8',
     '.js': 'application/javascript; charset=utf-8',
     '.json': 'application/json; charset=utf-8',
     '.svg': 'image/svg+xml',
     '.png': 'image/png',
-    '.jpg': 'image/jpeg',
-    '.jpeg': 'image/jpeg',
     '.ico': 'image/x-icon'
 };
 
+// ── Helpers ───────────────────────────────────────────────────────────────────
+
 function sendJson(res, code, body) {
-    res.writeHead(code, { 'Content-Type': 'application/json; charset=utf-8' });
+    res.writeHead(code, {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Access-Control-Allow-Origin': '*'
+    });
     res.end(JSON.stringify(body));
 }
 
 function collectBody(req) {
     return new Promise((resolve, reject) => {
-        let data = '';
-        req.on('data', (chunk) => {
-            data += chunk;
-            if (data.length > 1e6) {
-                reject(new Error('Request body too large'));
-            }
-        });
-        req.on('end', () => resolve(data));
+        const chunks = [];
+        req.on('data', chunk => chunks.push(chunk));
+        req.on('end', () => resolve(Buffer.concat(chunks)));
         req.on('error', reject);
     });
 }
 
-async function parseRequestBody(req) {
-    const raw = await collectBody(req);
-    if (!raw) return {};
+// ── Proxy request to Baileys backend ─────────────────────────────────────────
+function proxyToBackend(req, res, bodyBuffer) {
+    const targetUrl = new URL(req.url, BACKEND_URL);
+    const isHttps = targetUrl.protocol === 'https:';
+    const lib = isHttps ? https : http;
 
-    const contentType = req.headers['content-type'] || '';
+    const options = {
+        hostname: targetUrl.hostname,
+        port: targetUrl.port || (isHttps ? 443 : 80),
+        path: targetUrl.pathname + targetUrl.search,
+        method: req.method,
+        headers: {
+            ...req.headers,
+            host: targetUrl.host
+        }
+    };
 
-    if (contentType.includes('application/x-www-form-urlencoded')) {
-        return Object.fromEntries(new URLSearchParams(raw).entries());
+    const proxyReq = lib.request(options, (proxyRes) => {
+        res.writeHead(proxyRes.statusCode, proxyRes.headers);
+        proxyRes.pipe(res);
+    });
+
+    proxyReq.on('error', (err) => {
+        console.error('Proxy error:', err.message);
+        sendJson(res, 502, { error: 'Backend unavailable. Make sure the bot server is running on ' + BACKEND_URL });
+    });
+
+    if (bodyBuffer && bodyBuffer.length > 0) {
+        proxyReq.write(bodyBuffer);
+    }
+    proxyReq.end();
+}
+
+// ── Auth endpoints ────────────────────────────────────────────────────────────
+async function handleAuth(req, res, url, bodyBuffer) {
+    if (req.method === 'POST' && url.pathname === '/auth/login') {
+        let body = {};
+        try { body = JSON.parse(bodyBuffer.toString()); } catch (_) {}
+
+        const { password } = body;
+        if (password === DASHBOARD_PASSWORD) {
+            // Simple token: base64(timestamp + password hash)
+            const token = Buffer.from(`${Date.now()}:${DASHBOARD_PASSWORD}`).toString('base64');
+            return sendJson(res, 200, { success: true, token });
+        }
+        return sendJson(res, 401, { success: false, error: 'Invalid password' });
     }
 
-    return JSON.parse(raw);
+    if (req.method === 'POST' && url.pathname === '/auth/verify') {
+        let body = {};
+        try { body = JSON.parse(bodyBuffer.toString()); } catch (_) {}
+        const { token } = body;
+        // Simple verification — just check token exists and decode it
+        try {
+            const decoded = Buffer.from(token, 'base64').toString();
+            const [, pass] = decoded.split(':');
+            if (pass === DASHBOARD_PASSWORD) {
+                return sendJson(res, 200, { valid: true });
+            }
+        } catch (_) {}
+        return sendJson(res, 401, { valid: false });
+    }
+
+    return null; // not an auth route
 }
 
-function safePathname(pathname) {
-    if (pathname === '/') return '/login.html';
-
-    const normalized = path.normalize(pathname).replace(/^([.][.][/\\])+/, '');
-    return normalized.startsWith('/') ? normalized : `/${normalized}`;
-}
-
+// ── Static file server ────────────────────────────────────────────────────────
 function serveStatic(req, res, pathname) {
-    const safePath = safePathname(pathname);
-    const fullPath = path.join(ROOT_DIR, safePath);
+    if (pathname === '/') pathname = '/login.html';
+    const normalized = path.normalize(pathname).replace(/^([.][.][/\\])+/, '');
+    const fullPath = path.join(ROOT_DIR, normalized);
 
     if (!fullPath.startsWith(ROOT_DIR)) {
-        sendJson(res, 403, { error: 'Forbidden' });
-        return;
+        return sendJson(res, 403, { error: 'Forbidden' });
     }
 
     fs.readFile(fullPath, (err, content) => {
-        if (err) {
-            sendJson(res, 404, { error: 'Not Found' });
-            return;
-        }
-
+        if (err) return sendJson(res, 404, { error: 'Not found' });
         const ext = path.extname(fullPath).toLowerCase();
-        const contentType = STATIC_FILE_TYPES[ext] || 'application/octet-stream';
-        res.writeHead(200, { 'Content-Type': contentType });
+        res.writeHead(200, { 'Content-Type': STATIC_TYPES[ext] || 'application/octet-stream' });
         res.end(content);
     });
 }
 
-async function handleApi(req, res, url) {
-    if (req.method === 'GET' && url.pathname === '/api/health') {
-        return sendJson(res, 200, {
-            ok: true,
-            service: 'akay-bot-api',
-            twilioConfigured: hasTwilioConfig(),
-            timestamp: new Date().toISOString()
-        });
-    }
-
-    if (req.method === 'GET' && url.pathname === '/api/status') {
-        return sendJson(res, 200, {
-            ...getStatus(),
-            transport: hasTwilioConfig() ? 'twilio' : 'simulator'
-        });
-    }
-
-    if (req.method === 'POST' && url.pathname === '/api/connect') {
-        const body = await parseRequestBody(req).catch(() => ({}));
-        const phone = body.phone || process.env.TWILIO_WHATSAPP_FROM || '+2340000000000';
-        setConnectionStatus(true, phone);
-        return sendJson(res, 200, { success: true, status: getStatus() });
-    }
-
-    if (req.method === 'POST' && url.pathname === '/api/disconnect') {
-        setConnectionStatus(false);
-        return sendJson(res, 200, { success: true, status: getStatus() });
-    }
-
-    if (req.method === 'GET' && url.pathname === '/api/messages') {
-        const limit = Number(url.searchParams.get('limit') || 50);
-        return sendJson(res, 200, { messages: getMessages(limit) });
-    }
-
-    if (req.method === 'POST' && url.pathname === '/api/messages/incoming') {
-        const body = await parseRequestBody(req);
-        const from = body.from;
-        const text = body.text;
-
-        if (!from || !text) {
-            return sendJson(res, 400, { error: 'from and text are required' });
-        }
-
-        const inbound = addMessage({ from, text, direction: 'inbound', source: 'webhook' });
-
-        try {
-            const reply = await generateReply({ incomingText: text, sender: from });
-            const delivery = await sendWhatsAppMessage({ to: from, body: reply });
-            const outbound = addMessage({
-                from: 'AKAY-BOT',
-                to: from,
-                text: reply,
-                direction: 'outbound',
-                source: delivery.delivered ? 'twilio' : 'ai'
-            });
-
-            return sendJson(res, 200, { success: true, inbound, outbound, delivery });
-        } catch (error) {
-            return sendJson(res, 500, {
-                success: false,
-                inbound,
-                error: error.message
-            });
-        }
-    }
-
-    if (req.method === 'POST' && url.pathname === '/webhooks/twilio/whatsapp') {
-        const body = await parseRequestBody(req);
-        const from = body.From || body.WaId || 'unknown';
-        const text = body.Body || '';
-
-        if (!text) {
-            return sendJson(res, 200, { received: true, ignored: true, reason: 'No text body' });
-        }
-
-        const inbound = addMessage({ from, text, direction: 'inbound', source: 'twilio-webhook' });
-
-        try {
-            const reply = await generateReply({ incomingText: text, sender: from });
-            const delivery = await sendWhatsAppMessage({ to: from, body: reply });
-            const outbound = addMessage({
-                from: 'AKAY-BOT',
-                to: from,
-                text: reply,
-                direction: 'outbound',
-                source: delivery.delivered ? 'twilio' : 'ai'
-            });
-
-            return sendJson(res, 200, { received: true, inbound, outbound, delivery });
-        } catch (error) {
-            return sendJson(res, 500, { received: true, inbound, error: error.message });
-        }
-    }
-
-    return sendJson(res, 404, { error: 'API route not found' });
-}
-
+// ── Main request handler ──────────────────────────────────────────────────────
 const server = http.createServer(async (req, res) => {
+    // CORS preflight
+    if (req.method === 'OPTIONS') {
+        res.writeHead(204, { 'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET,POST,DELETE,OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type,Authorization' });
+        return res.end();
+    }
+
     try {
         const url = new URL(req.url, `http://${req.headers.host}`);
+        const bodyBuffer = await collectBody(req);
 
-        if (url.pathname.startsWith('/api/') || url.pathname.startsWith('/webhooks/')) {
-            await handleApi(req, res, url);
-            return;
+        // Auth routes (handled locally — password lives in .env on server)
+        if (url.pathname.startsWith('/auth/')) {
+            const handled = await handleAuth(req, res, url, bodyBuffer);
+            if (handled !== null) return;
         }
 
+        // Proxy all /api/* calls to Baileys backend
+        if (url.pathname.startsWith('/api/')) {
+            return proxyToBackend(req, res, bodyBuffer);
+        }
+
+        // Serve static files
         serveStatic(req, res, url.pathname);
-    } catch (error) {
-        sendJson(res, 500, { error: 'Internal server error', detail: error.message });
+    } catch (err) {
+        console.error('Server error:', err.message);
+        sendJson(res, 500, { error: 'Internal server error' });
     }
 });
 
 server.listen(PORT, () => {
-    console.log(`AKAY Bot server running on http://localhost:${PORT}`);
+    console.log(`✓ AKAY Dashboard running on http://localhost:${PORT}`);
+    console.log(`  Proxying API calls to: ${BACKEND_URL}`);
 });

@@ -79,22 +79,85 @@
             <div class="connect-card">
                 <div class="qr-section">
                     <h2>Connect Your WhatsApp</h2>
-                    <p>Use a pairing code to link your WhatsApp account to the bot</p>
-                    <div class="qr-code" id="qrCode">
-                        <div class="pairing-instructions">
-                            <p>Run <code>npm start -- --pairing-code</code> in your bot terminal to get a pairing code, then enter it in WhatsApp.</p>
+                    <p id="connectSubtitle">Choose how to link your WhatsApp account to the bot</p>
+
+                    <!-- Status display -->
+                    <div id="connectStatusBanner" class="connect-banner" style="display:none;"></div>
+
+                    <!-- QR Code display -->
+                    <div class="qr-code-wrapper" id="qrWrapper" style="display:none;">
+                        <img id="qrImage" src="" alt="QR Code" style="width:220px;height:220px;border-radius:8px;">
+                        <p class="qr-hint">Scan with WhatsApp → Settings → Linked Devices → Link a Device</p>
+                        <p class="qr-hint" style="color:var(--color-text-tertiary);font-size:12px;">QR expires in 60s — refreshes automatically</p>
+                    </div>
+
+                    <!-- Pairing code display -->
+                    <div id="pairingWrapper" style="display:none; text-align:center; padding: 24px 0;">
+                        <div class="pairing-code-display" id="pairingCodeDisplay">----</div>
+                        <p class="qr-hint">Enter this code in WhatsApp → Settings → Linked Devices → Link with phone number instead</p>
+                    </div>
+
+                    <!-- Connected state -->
+                    <div id="connectedWrapper" style="display:none; text-align:center; padding:32px 0;">
+                        <div style="font-size:48px; margin-bottom:12px;">✅</div>
+                        <h3 style="color:var(--color-success)">Connected!</h3>
+                        <p id="connectedPhone" style="color:var(--color-text-secondary); margin-top:8px;"></p>
+                    </div>
+
+                    <!-- Idle / choose method -->
+                    <div id="connectActions">
+                        <div class="connect-method-row">
+                            <div class="connect-method-card" onclick="requestQR()">
+                                <div class="method-icon">📷</div>
+                                <h3>Scan QR Code</h3>
+                                <p>Scan with your phone camera</p>
+                                <button class="btn-primary" style="margin-top:12px;">Generate QR</button>
+                            </div>
+                            <div class="connect-method-card" id="pairingMethodCard">
+                                <div class="method-icon">🔢</div>
+                                <h3>Pairing Code</h3>
+                                <p>Enter your WhatsApp number</p>
+                                <div style="margin-top:12px; display:flex; gap:8px;">
+                                    <input type="tel" id="pairingPhoneInput" class="form-control"
+                                        placeholder="+234 901 234 5678"
+                                        style="flex:1; font-size:13px;"
+                                        onkeydown="if(event.key==='Enter') requestPairingCode()">
+                                    <button class="btn-primary" onclick="requestPairingCode()">Get Code</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="disconnectSection" style="display:none; text-align:center; margin-top:24px;">
+                            <button class="btn-danger" onclick="disconnectWhatsApp()">⚠️ Disconnect WhatsApp</button>
+                            <p style="font-size:12px; color:var(--color-text-tertiary); margin-top:8px;">This will log out and require re-pairing</p>
                         </div>
                     </div>
                 </div>
+
                 <div class="instructions">
-                    <h3>How to connect:</h3>
-                    <ol>
-                        <li>Open your bot terminal and run <code>npm start -- --pairing-code</code></li>
-                        <li>Open WhatsApp on your phone</li>
-                        <li>Go to <strong>Settings → Linked Devices</strong></li>
-                        <li>Tap <strong>Link a Device → Link with phone number instead</strong></li>
-                        <li>Enter the 8-digit code shown in your terminal</li>
-                    </ol>
+                    <h3>📋 How to connect:</h3>
+                    <div class="instruction-tabs">
+                        <div class="instruction-block">
+                            <strong>Option A — QR Code</strong>
+                            <ol>
+                                <li>Click <em>Generate QR</em></li>
+                                <li>Open WhatsApp on your phone</li>
+                                <li>Go to <strong>Settings → Linked Devices</strong></li>
+                                <li>Tap <strong>Link a Device</strong></li>
+                                <li>Scan the QR code</li>
+                            </ol>
+                        </div>
+                        <div class="instruction-block" style="margin-top:16px;">
+                            <strong>Option B — Pairing Code</strong>
+                            <ol>
+                                <li>Enter your WhatsApp phone number</li>
+                                <li>Click <em>Get Code</em></li>
+                                <li>Open WhatsApp → <strong>Settings → Linked Devices</strong></li>
+                                <li>Tap <strong>Link a Device → Link with phone number instead</strong></li>
+                                <li>Enter the 8-digit code</li>
+                            </ol>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

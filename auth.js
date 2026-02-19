@@ -1,111 +1,202 @@
-// AKAY Bot - Auth Module
-// Password validation happens server-side via /auth/login
-// Token stored in sessionStorage (not localStorage) — cleared on tab close
+// Authentication System for AKAY Bot Dashboard
 
-const SESSION_KEY = 'akay_token';
-const LOGIN_ATTEMPTS_KEY = 'akay_attempts';
-const MAX_ATTEMPTS = 5;
-const LOCKOUT_MS = 15 * 60 * 1000;
+// Default admin credentials (in production, this would be server-side)
+const ADMIN_CREDENTIALS = {
+    username: 'admin',
+    password: 'akaybot2026', // Change this!
+    email: 'admin@akaybot.com'
+};
 
-function getToken() {
-    return sessionStorage.getItem(SESSION_KEY);
+const SESSION_KEY = 'akay_session';
+const LOGIN_ATTEMPTS_KEY = 'akay_login_attempts';
+const MAX_LOGIN_ATTEMPTS = 5;
+const LOCKOUT_DURATION_MS = 15 * 60 * 1000; // 15 minutes
+
+function getSessionData() {
+    const session = localStorage.getItem(SESSION_KEY);
+    if (!session) return null;
+
+    try {
+        return JSON.parse(session);
+    } catch (e) {
+        localStorage.removeItem(SESSION_KEY);
+        return null;
+    }
 }
 
-function getAttempts() {
+function getLoginAttempts() {
+    const data = localStorage.getItem(LOGIN_ATTEMPTS_KEY);
+    if (!data) {
+        return { count: 0, lockedUntil: 0 };
+    }
+
     try {
-        return JSON.parse(localStorage.getItem(LOGIN_ATTEMPTS_KEY)) || { count: 0, lockedUntil: 0 };
-    } catch (_) {
+        const parsed = JSON.parse(data);
+        return {
+            count: Number(parsed.count) || 0,
+            lockedUntil: Number(parsed.lockedUntil) || 0
+        };
+    } catch (e) {
+        localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
         return { count: 0, lockedUntil: 0 };
     }
 }
 
-function setAttempts(count, lockedUntil = 0) {
-    localStorage.setItem(LOGIN_ATTEMPTS_KEY, JSON.stringify({ count, lockedUntil }));
+function setLoginAttempts(count, lockedUntil = 0) {
+    localStorage.setItem(
+        LOGIN_ATTEMPTS_KEY,
+        JSON.stringify({ count, lockedUntil })
+    );
 }
 
-function clearAttempts() {
+function clearLoginAttempts() {
     localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
 }
 
-function getLockoutRemaining() {
-    const { lockedUntil } = getAttempts();
-    const remaining = lockedUntil - Date.now();
-    if (remaining <= 0 && lockedUntil !== 0) clearAttempts();
-    return Math.max(remaining, 0);
+function getLockoutRemainingMs() {
+    const attempts = getLoginAttempts();
+    const now = Date.now();
+
+    if (attempts.lockedUntil > now) {
+        return attempts.lockedUntil - now;
+    }
+
+    if (attempts.lockedUntil !== 0) {
+        clearLoginAttempts();
+    }
+
+    return 0;
 }
 
-function formatTime(ms) {
-    const s = Math.ceil(ms / 1000);
-    const m = Math.floor(s / 60);
-    return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
+function formatDuration(ms) {
+    const totalSeconds = Math.ceil(ms / 1000);
+    const minutes = Math.floor(totalSeconds / 60);
+    const seconds = totalSeconds % 60;
+
+    if (minutes > 0) {
+        return `${minutes}m ${seconds}s`;
+    }
+
+    return `${seconds}s`;
 }
 
-// Call server to verify token is still valid
-async function verifyToken(token) {
-    try {
-        const res = await fetch('/auth/verify', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token })
-        });
-        const data = await res.json();
-        return data.valid === true;
-    } catch (_) {
+function getAuthState() {
+    const lockoutRemainingMs = getLockoutRemainingMs();
+    const attempts = getLoginAttempts();
+
+    return {
+        isLocked: lockoutRemainingMs > 0,
+        lockoutRemainingMs,
+        lockoutRemainingText: formatDuration(lockoutRemainingMs),
+        attemptsLeft: Math.max(MAX_LOGIN_ATTEMPTS - attempts.count, 0)
+    };
+}
+
+// Check if user is authenticated
+function isAuthenticated() {
+    const sessionData = getSessionData();
+    if (!sessionData) return false;
+
+    const now = Date.now();
+
+    // Check if session is expired
+    if (now > sessionData.expires) {
+        logout();
         return false;
     }
+
+    return sessionData.authenticated === true;
 }
 
-async function isAuthenticated() {
-    const token = getToken();
-    if (!token) return false;
-    return await verifyToken(token);
-}
-
-async function login(password) {
-    const lockoutRemaining = getLockoutRemaining();
-    if (lockoutRemaining > 0) {
-        return { success: false, reason: 'locked', remaining: formatTime(lockoutRemaining) };
+// Login function
+function login(username, password, rememberMe = false) {
+    if (getLockoutRemainingMs() > 0) {
+        return {
+            success: false,
+            reason: 'locked',
+            ...getAuthState()
+        };
     }
 
-    try {
-        const res = await fetch('/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ password })
-        });
-        const data = await res.json();
+    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
+        const now = Date.now();
+        const sessionDurationMs = rememberMe
+            ? 24 * 60 * 60 * 1000
+            : 2 * 60 * 60 * 1000;
+        const expires = now + sessionDurationMs;
+        
+        const sessionData = {
+            authenticated: true,
+            username: username,
+            email: ADMIN_CREDENTIALS.email,
+            loginTime: now,
+            expires: expires
+        };
+        
+        localStorage.setItem(SESSION_KEY, JSON.stringify(sessionData));
+        clearLoginAttempts();
 
-        if (data.success && data.token) {
-            sessionStorage.setItem(SESSION_KEY, data.token);
-            clearAttempts();
-            return { success: true };
-        }
-    } catch (_) {}
+        return {
+            success: true,
+            expires,
+            sessionDurationMs
+        };
+    }
 
-    const attempts = getAttempts();
+    const attempts = getLoginAttempts();
     const nextCount = attempts.count + 1;
 
-    if (nextCount >= MAX_ATTEMPTS) {
-        setAttempts(nextCount, Date.now() + LOCKOUT_MS);
-        return { success: false, reason: 'locked', remaining: formatTime(LOCKOUT_MS) };
+    if (nextCount >= MAX_LOGIN_ATTEMPTS) {
+        const lockedUntil = Date.now() + LOCKOUT_DURATION_MS;
+        setLoginAttempts(nextCount, lockedUntil);
+        return {
+            success: false,
+            reason: 'locked',
+            ...getAuthState()
+        };
     }
 
-    setAttempts(nextCount);
-    return { success: false, reason: 'invalid', attemptsLeft: MAX_ATTEMPTS - nextCount };
+    setLoginAttempts(nextCount, 0);
+    return {
+        success: false,
+        reason: 'invalid_credentials',
+        ...getAuthState()
+    };
 }
 
+// Logout function
 function logout() {
-    sessionStorage.removeItem(SESSION_KEY);
+    localStorage.removeItem(SESSION_KEY);
     window.location.href = 'login.html';
 }
 
+// Get current user info
 function getCurrentUser() {
-    return { username: 'Admin' };
+    const sessionData = getSessionData();
+    if (!sessionData) {
+        return null;
+    }
+
+    return {
+        username: sessionData.username,
+        email: sessionData.email,
+        loginTime: new Date(sessionData.loginTime).toLocaleString()
+    };
 }
 
-async function requireAuth() {
-    const ok = await isAuthenticated();
-    if (!ok) {
+// Protect page - redirect to login if not authenticated
+function requireAuth() {
+    if (!isAuthenticated()) {
         window.location.href = 'login.html';
     }
 }
+
+// Auto-logout on session expiry
+setInterval(() => {
+    if (!isAuthenticated()) {
+        const currentPage = window.location.pathname;
+        if (!currentPage.includes('login.html')) {
+            logout();
+        }
+    }
+}, 60000); // Check every minute

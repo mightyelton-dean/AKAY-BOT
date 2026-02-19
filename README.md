@@ -6,9 +6,7 @@ A complete WhatsApp automation dashboard with AI-powered responses, authenticati
 
 The platform includes a secure login system with session management:
 
-### Default Credentials
-- **Username:** `admin`
-- **Password:** `akaybot2026`
+
 
 ⚠️ **IMPORTANT:** Change these credentials in `auth.js` before deploying to production!
 

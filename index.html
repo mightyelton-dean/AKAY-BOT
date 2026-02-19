@@ -9,10 +9,6 @@
     <script src="auth.js"></script>
 </head>
 <body>
-    <script>
-        // Protect this page - require authentication
-        requireAuth();
-    </script>
     <aside class="sidebar">
         <div class="sidebar-header">
             <div class="logo">
@@ -25,71 +21,43 @@
         </div>
         <nav class="nav">
             <a href="#" class="nav-item" data-page="connect">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
-                    <rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
-                    <rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
-                    <rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><rect x="3" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="3" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="3" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/><rect x="11" y="11" width="6" height="6" rx="1" stroke="currentColor" stroke-width="1.5"/></svg>
                 <span>Connect WhatsApp</span>
             </a>
             <a href="#" class="nav-item active" data-page="overview">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M3 14L7 10L11 14L17 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 14L7 10L11 14L17 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span>Dashboard</span>
             </a>
             <a href="#" class="nav-item" data-page="conversations">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M3 5.5C3 4.11929 4.11929 3 5.5 3H14.5C15.8807 3 17 4.11929 17 5.5V11.5C17 12.8807 15.8807 14 14.5 14H7L3 17V5.5Z" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M3 5.5C3 4.11929 4.11929 3 5.5 3H14.5C15.8807 3 17 4.11929 17 5.5V11.5C17 12.8807 15.8807 14 14.5 14H7L3 17V5.5Z" stroke="currentColor" stroke-width="1.5"/></svg>
                 <span>Conversations</span>
             </a>
-            <a href="#" class="nav-item" data-page="contacts">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M4 17C4 13.686 6.68629 11 10 11C13.3137 11 16 13.686 16 17" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
-                <span>Contacts</span>
+            <a href="#" class="nav-item" data-page="knowledge">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M10 2C10 2 4 5 4 11C4 14.3137 6.68629 17 10 17C13.3137 17 16 14.3137 16 11C16 5 10 2 10 2Z" stroke="currentColor" stroke-width="1.5"/><path d="M10 12V10M10 8H10.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+                <span>Knowledge Base</span>
+            </a>
+            <a href="#" class="nav-item" data-page="sessions">
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="7" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M4 17C4 13.686 6.68629 11 10 11C13.3137 11 16 13.686 16 17" stroke="currentColor" stroke-width="1.5"/></svg>
+                <span>Sessions</span>
             </a>
             <a href="#" class="nav-item" data-page="broadcast">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M2 10H6L10 3L14 17L18 10H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><path d="M2 10H6L10 3L14 17L18 10H22" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 <span>Broadcast</span>
             </a>
-            <a href="#" class="nav-item" data-page="automation">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <path d="M13 7L17 10L13 13M7 7L3 10L7 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                <span>Automation</span>
-            </a>
-            <a href="#" class="nav-item" data-page="templates">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <rect x="3" y="3" width="14" height="14" rx="2" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M7 8H13M7 11H11" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
-                </svg>
-                <span>Templates</span>
-            </a>
             <a href="#" class="nav-item" data-page="settings">
-                <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                    <circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/>
-                    <path d="M10 2V4M10 16V18M4.93 4.93L6.34 6.34M13.66 13.66L15.07 15.07M2 10H4M16 10H18M4.93 15.07L6.34 13.66M13.66 6.34L15.07 4.93" stroke="currentColor" stroke-width="1.5"/>
-                </svg>
+                <svg width="20" height="20" viewBox="0 0 20 20" fill="none"><circle cx="10" cy="10" r="3" stroke="currentColor" stroke-width="1.5"/><path d="M10 2V4M10 16V18M4.93 4.93L6.34 6.34M13.66 13.66L15.07 15.07M2 10H4M16 10H18M4.93 15.07L6.34 13.66M13.66 6.34L15.07 4.93" stroke="currentColor" stroke-width="1.5"/></svg>
                 <span>Settings</span>
             </a>
         </nav>
         <div class="sidebar-footer">
             <div class="user-info">
-                <div class="avatar" id="userAvatar">ED</div>
+                <div class="avatar" id="userAvatar">AD</div>
                 <div class="user-details">
-                    <div class="user-name" id="userName">EltonDean</div>
+                    <div class="user-name" id="userName">Admin</div>
                     <div class="user-role">Administrator</div>
                 </div>
                 <button class="btn-icon-small logout-btn" onclick="logout()" title="Logout">
-                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
-                        <path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M11 11L14 8M14 8L11 5M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
+                    <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M6 14H3C2.44772 14 2 13.5523 2 13V3C2 2.44772 2.44772 2 3 2H6M11 11L14 8M14 8L11 5M14 8H6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
                 </button>
             </div>
         </div>
@@ -104,212 +72,232 @@
                     <span id="statusText">Disconnected</span>
                 </div>
             </div>
-            <div class="header-right">
-                <button class="btn-icon notification">
-                    <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-                        <path d="M8 17H12M10 2V3M10 3C7.79086 3 6 4.79086 6 7V10L4 12V13H16V12L14 10V7C14 4.79086 12.2091 3 10 3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-                    </svg>
-                    <span class="notification-badge">3</span>
-                </button>
-            </div>
         </header>
 
+        <!-- CONNECT PAGE -->
         <div class="content" id="connect-page" style="display:none;">
             <div class="connect-card">
                 <div class="qr-section">
                     <h2>Connect Your WhatsApp</h2>
-                    <p>Scan the QR code with WhatsApp to link your account</p>
+                    <p>Use a pairing code to link your WhatsApp account to the bot</p>
                     <div class="qr-code" id="qrCode">
-                        <svg width="200" height="200" viewBox="0 0 200 200">
-                            <rect x="20" y="20" width="60" height="60" fill="currentColor"/>
-                            <rect x="120" y="20" width="60" height="60" fill="currentColor"/>
-                            <rect x="20" y="120" width="60" height="60" fill="currentColor"/>
-                            <rect x="40" y="40" width="20" height="20" fill="white"/>
-                            <rect x="140" y="40" width="20" height="20" fill="white"/>
-                            <rect x="40" y="140" width="20" height="20" fill="white"/>
-                        </svg>
+                        <div class="pairing-instructions">
+                            <p>Run <code>npm start -- --pairing-code</code> in your bot terminal to get a pairing code, then enter it in WhatsApp.</p>
+                        </div>
                     </div>
-                    <button class="btn-primary btn-large" onclick="generateQR()">Generate QR Code</button>
                 </div>
                 <div class="instructions">
                     <h3>How to connect:</h3>
                     <ol>
+                        <li>Open your bot terminal and run <code>npm start -- --pairing-code</code></li>
                         <li>Open WhatsApp on your phone</li>
-                        <li>Go to <strong>Settings</strong> → <strong>Linked Devices</strong></li>
-                        <li>Tap <strong>Link a Device</strong></li>
-                        <li>Scan the QR code above</li>
+                        <li>Go to <strong>Settings → Linked Devices</strong></li>
+                        <li>Tap <strong>Link a Device → Link with phone number instead</strong></li>
+                        <li>Enter the 8-digit code shown in your terminal</li>
                     </ol>
                 </div>
             </div>
         </div>
 
+        <!-- DASHBOARD PAGE -->
         <div class="content" id="overview-page">
             <div class="stats-grid">
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-label">Total Messages</span>
-                    </div>
-                    <div class="stat-value">1,247</div>
-                    <div class="stat-change positive">↑ 12% from last week</div>
+                    <div class="stat-header"><span class="stat-label">Total Messages</span></div>
+                    <div class="stat-value" id="statTotalMessages">—</div>
+                    <div class="stat-change positive">All time</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-label">Active Users</span>
-                    </div>
-                    <div class="stat-value">89</div>
-                    <div class="stat-change positive">↑ 23% from last week</div>
+                    <div class="stat-header"><span class="stat-label">Active Users (24h)</span></div>
+                    <div class="stat-value" id="statActiveUsers">—</div>
+                    <div class="stat-change positive">Last 24 hours</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-label">Response Time</span>
-                    </div>
-                    <div class="stat-value">1.2s</div>
-                    <div class="stat-change positive">↓ 0.3s faster</div>
+                    <div class="stat-header"><span class="stat-label">Total Users</span></div>
+                    <div class="stat-value" id="statTotalUsers">—</div>
+                    <div class="stat-change">Unique contacts</div>
                 </div>
                 <div class="stat-card">
-                    <div class="stat-header">
-                        <span class="stat-label">Success Rate</span>
-                    </div>
-                    <div class="stat-value">94%</div>
-                    <div class="stat-change positive">↑ 5% improvement</div>
+                    <div class="stat-header"><span class="stat-label">Conversations</span></div>
+                    <div class="stat-value" id="statTotalConversations">—</div>
+                    <div class="stat-change">All chats</div>
                 </div>
             </div>
-
             <div class="chart-card">
                 <div class="chart-header">
                     <h2>Message Activity</h2>
-                    <div class="chart-controls">
-                        <button class="chart-tab active">7D</button>
-                        <button class="chart-tab">30D</button>
-                        <button class="chart-tab">90D</button>
-                    </div>
                 </div>
                 <canvas id="messageChart"></canvas>
             </div>
         </div>
 
+        <!-- CONVERSATIONS PAGE -->
         <div class="content" id="conversations-page" style="display:none;">
-            <div class="page-header">
-                <h2>Conversations</h2>
-                <div class="search-box">
-                    <input type="text" placeholder="Search conversations...">
+            <div class="conversations-layout">
+                <div class="conversations-sidebar">
+                    <div class="page-header">
+                        <h2>Conversations</h2>
+                        <div class="search-box">
+                            <input type="text" placeholder="Search..." oninput="filterConversations(this.value)">
+                        </div>
+                    </div>
+                    <div id="conversationsList" class="conversations-list">
+                        <div class="empty-state">
+                            <h3>No conversations yet</h3>
+                            <p>Connect WhatsApp to start receiving messages</p>
+                        </div>
+                    </div>
                 </div>
-            </div>
-            <div class="empty-state">
-                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                    <circle cx="32" cy="32" r="30" stroke="currentColor" stroke-width="2"/>
-                    <path d="M20 28H44M20 36H36" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <h3>No conversations yet</h3>
-                <p>Connect WhatsApp to start receiving messages</p>
+                <div class="message-panel" id="messagePanel" style="display:none;">
+                    <div class="message-panel-header">
+                        <button class="btn-icon-small" onclick="document.getElementById('messagePanel').style.display='none'">←</button>
+                        <span id="messagePanelTitle"></span>
+                    </div>
+                    <div class="messages-list" id="messagesList"></div>
+                </div>
             </div>
         </div>
 
-        <div class="content" id="contacts-page" style="display:none;">
+        <!-- KNOWLEDGE BASE PAGE -->
+        <div class="content" id="knowledge-page" style="display:none;">
             <div class="page-header">
-                <h2>Contacts</h2>
-                <div class="page-actions">
-                    <button class="btn-secondary">Import CSV</button>
-                    <button class="btn-primary">Add Contact</button>
-                </div>
+                <h2>Knowledge Base</h2>
             </div>
-            <div class="empty-state">
-                <svg width="64" height="64" viewBox="0 0 64 64" fill="none">
-                    <circle cx="32" cy="24" r="10" stroke="currentColor" stroke-width="2"/>
-                    <path d="M12 54C12 44 20 36 32 36C44 36 52 44 52 54" stroke="currentColor" stroke-width="2"/>
-                </svg>
-                <h3>No contacts yet</h3>
-                <p>Add contacts manually or import from CSV</p>
+
+            <!-- Chat Export Upload -->
+            <div class="settings-card import-card">
+                <h3>📁 Import WhatsApp Chat Export</h3>
+                <p class="help-text">Export a chat from WhatsApp (Chat → More → Export Chat → Without Media) and upload the .txt file here. The bot will learn from your past replies.</p>
+                <div class="import-form">
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Your Name in the Chat</label>
+                            <input type="text" id="yourName" class="form-control" placeholder="e.g. EltonDean — exactly as it appears in the .txt file">
+                        </div>
+                        <div class="form-group">
+                            <label>Chat Export File (.txt)</label>
+                            <input type="file" id="chatExportFile" class="form-control" accept=".txt,.zip">
+                        </div>
+                    </div>
+                    <button class="btn-primary" onclick="importChatExport()">Import & Train Bot</button>
+                </div>
+                <div id="importStatus" class="import-status" style="display:none;"></div>
+            </div>
+
+            <!-- Manual Add -->
+            <div class="settings-card">
+                <h3>Add FAQ Manually</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Question</label>
+                        <input type="text" id="kbQuestion" class="form-control" placeholder="e.g. What are your delivery areas?">
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="kbCategory" class="form-control">
+                            <option value="general">General</option>
+                            <option value="pricing">Pricing</option>
+                            <option value="delivery">Delivery</option>
+                            <option value="orders">Orders</option>
+                            <option value="payment">Payment</option>
+                            <option value="hours">Hours</option>
+                            <option value="products">Products</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Answer</label>
+                    <textarea id="kbAnswer" class="form-control" rows="3" placeholder="e.g. We deliver to Lagos Island, Lekki, and Victoria Island."></textarea>
+                </div>
+                <button class="btn-primary" onclick="addKBEntry()">Add Entry</button>
+            </div>
+
+            <!-- FAQ Table -->
+            <div class="table-card">
+                <div class="table-header">
+                    <h3>FAQ Entries</h3>
+                    <button class="btn-secondary btn-sm" onclick="loadKnowledgeBase()">Refresh</button>
+                </div>
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>Question</th><th>Answer</th><th>Category</th><th></th></tr>
+                        </thead>
+                        <tbody id="kbTableBody">
+                            <tr><td colspan="4" class="loading-text">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
             </div>
         </div>
 
+        <!-- SESSIONS PAGE -->
+        <div class="content" id="sessions-page" style="display:none;">
+            <div class="page-header">
+                <h2>Active Sessions <span class="badge" id="activeSessionsCount">0</span></h2>
+                <button class="btn-secondary" onclick="loadSessions()">Refresh</button>
+            </div>
+            <p class="help-text" style="margin-bottom:16px;">Sessions track users mid-conversation (e.g. placing an order). They're stored in SQLite and survive bot restarts.</p>
+            <div class="table-card">
+                <div class="table-wrapper">
+                    <table class="data-table">
+                        <thead>
+                            <tr><th>User</th><th>State</th><th>Last Activity</th><th></th></tr>
+                        </thead>
+                        <tbody id="sessionsTableBody">
+                            <tr><td colspan="4" class="loading-text">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- BROADCAST PAGE -->
         <div class="content" id="broadcast-page" style="display:none;">
             <div class="broadcast-container">
                 <div class="form-section">
                     <h2>Send Broadcast</h2>
-                    <div class="form-group">
-                        <label>Recipients</label>
-                        <select class="form-control">
-                            <option>All Contacts (247)</option>
-                            <option>Active Users (89)</option>
-                        </select>
-                    </div>
+                    <p class="help-text" style="margin-bottom:16px;">⚠️ WhatsApp may restrict accounts that send bulk messages to people who haven't messaged first. Use responsibly.</p>
                     <div class="form-group">
                         <label>Message</label>
-                        <textarea class="form-control" rows="8" placeholder="Type your message..."></textarea>
+                        <textarea class="form-control" rows="8" placeholder="Type your broadcast message..."></textarea>
                     </div>
-                    <button class="btn-primary btn-large">Send Broadcast</button>
+                    <button class="btn-primary btn-large" onclick="showToast('Broadcast feature coming soon')">Send Broadcast</button>
                 </div>
             </div>
         </div>
 
-        <div class="content" id="automation-page" style="display:none;">
-            <div class="page-header">
-                <h2>Automation Rules</h2>
-                <button class="btn-primary">Create Rule</button>
-            </div>
-            <div class="automation-grid">
-                <div class="automation-card">
-                    <div class="automation-header">
-                        <h3>Welcome Message</h3>
-                        <label class="toggle">
-                            <input type="checkbox" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <p>Send automated welcome to new contacts</p>
-                    <div class="automation-stats">47 triggers today</div>
-                </div>
-                <div class="automation-card">
-                    <div class="automation-header">
-                        <h3>Business Hours</h3>
-                        <label class="toggle">
-                            <input type="checkbox" checked>
-                            <span class="toggle-slider"></span>
-                        </label>
-                    </div>
-                    <p>Auto-reply outside business hours</p>
-                    <div class="automation-stats">12 triggers today</div>
-                </div>
-            </div>
-        </div>
-
-        <div class="content" id="templates-page" style="display:none;">
-            <div class="page-header">
-                <h2>Message Templates</h2>
-                <button class="btn-primary">New Template</button>
-            </div>
-            <div class="templates-grid">
-                <div class="template-card">
-                    <h3>Order Confirmation</h3>
-                    <p class="template-preview">Thank you for your order! Your order #{order_id}...</p>
-                    <div class="template-footer">
-                        <span>Used 247 times</span>
-                        <button class="btn-secondary btn-sm">Edit</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <!-- SETTINGS PAGE -->
         <div class="content" id="settings-page" style="display:none;">
             <h2>Settings</h2>
             <div class="settings-card">
                 <h3>AI Configuration</h3>
+                <p class="help-text">These settings are saved locally. To change the actual AI model, update <code>AI_MODEL</code> in your backend <code>.env</code> file.</p>
                 <div class="form-group">
                     <label>AI Model</label>
-                    <select class="form-control">
-                        <option>Claude Sonnet 4</option>
-                        <option>Claude Opus 4</option>
-                        <option>GPT-4</option>
+                    <select class="form-control" id="aiModel">
+                        <option value="claude-haiku-4-5">Claude Haiku 4.5 (Fast & Cheap)</option>
+                        <option value="claude-sonnet-4-5">Claude Sonnet 4.5 (Recommended)</option>
+                        <option value="claude-opus-4-5">Claude Opus 4.5 (Most Capable)</option>
                     </select>
                 </div>
                 <div class="form-group">
-                    <label>System Prompt</label>
-                    <textarea class="form-control" rows="6">You are a helpful WhatsApp AI assistant...</textarea>
+                    <label>System Prompt Reference</label>
+                    <textarea class="form-control" rows="6" id="systemPrompt" placeholder="View/note your system prompt here. To change it, edit services/aiService.js in the backend.">You are a helpful WhatsApp AI assistant...</textarea>
                 </div>
-                <button class="btn-primary">Save Settings</button>
+                <button class="btn-primary" onclick="saveSettings()">Save Notes</button>
+            </div>
+            <div class="settings-card">
+                <h3>Backend Connection</h3>
+                <p class="help-text">This dashboard proxies API calls to your Baileys bot backend. Make sure both servers are running.</p>
+                <div class="form-group">
+                    <label>Backend URL (set in dashboard .env)</label>
+                    <input type="text" class="form-control" value="http://localhost:3001" disabled>
+                </div>
+                <button class="btn-secondary" onclick="refreshStatus().then(() => showToast('Status refreshed'))">Test Connection</button>
             </div>
         </div>
+
     </main>
 
     <script src="script.js"></script>

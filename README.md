@@ -14,7 +14,8 @@ The platform includes a secure login system with session management:
 
 ### Security Features
 - Session-based authentication
-- 24-hour auto-logout
+- Configurable session duration (2 hours default, 24 hours with “Remember me”)
+- Login attempt throttling (5 failed attempts triggers a 15-minute lockout)
 - Protected routes (redirects to login if not authenticated)
 - Secure logout functionality
 - LocalStorage session management
@@ -84,6 +85,46 @@ akay-bot/
 ├── vercel.json         # Deployment config
 └── README.md           # This file
 ```
+
+
+## ⚙️ Backend API (MVP - newly added)
+
+A lightweight Node.js HTTP backend is now included to begin real WhatsApp AI agent implementation:
+
+- `GET /api/health` - health check
+- `GET /api/status` - connection + message counters
+- `POST /api/connect` - set WhatsApp connected state (MVP placeholder)
+- `POST /api/disconnect` - set disconnected state
+- `GET /api/messages` - fetch recent inbound/outbound messages
+- `POST /api/messages/incoming` - simulate inbound WhatsApp message and generate AI reply
+- `POST /webhooks/twilio/whatsapp` - Twilio inbound webhook endpoint for real WhatsApp messages
+
+### Run backend
+
+```bash
+# No dependency install required for this HTTP-server version
+node server.js
+```
+
+Server runs on `http://localhost:3000`.
+
+### Environment variables
+
+Create `.env` (optional for fallback mode):
+
+```bash
+OPENAI_API_KEY=your_openai_key
+AI_MODEL=gpt-4o-mini
+SYSTEM_PROMPT=You are a concise and helpful WhatsApp support assistant.
+TWILIO_ACCOUNT_SID=ACxxxxxxxxxxxxxxxxxxxx
+TWILIO_AUTH_TOKEN=xxxxxxxxxxxxxxxxxxxx
+TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
+PORT=3000
+```
+
+If `OPENAI_API_KEY` is missing, the app returns a safe fallback response so you can keep building UI and flow.
+
+If Twilio variables are set, outbound replies are sent via Twilio WhatsApp API; otherwise, delivery runs in simulator mode.
 
 ## 🔧 Setup Instructions
 

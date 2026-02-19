@@ -1,89 +1,111 @@
-// Authentication System for AKAY Bot Dashboard
+// AKAY Bot - Auth Module
+// Password validation happens server-side via /auth/login
+// Token stored in sessionStorage (not localStorage) — cleared on tab close
 
-// Default admin credentials (in production, this would be server-side)
-const ADMIN_CREDENTIALS = {
-    username: 'admin',
-    password: 'akaybot2026', // Change this!
-    email: 'admin@akaybot.com'
-};
+const SESSION_KEY = 'akay_token';
+const LOGIN_ATTEMPTS_KEY = 'akay_attempts';
+const MAX_ATTEMPTS = 5;
+const LOCKOUT_MS = 15 * 60 * 1000;
 
-// Check if user is authenticated
-function isAuthenticated() {
-    const session = localStorage.getItem('akay_session');
-    if (!session) return false;
-    
+function getToken() {
+    return sessionStorage.getItem(SESSION_KEY);
+}
+
+function getAttempts() {
     try {
-        const sessionData = JSON.parse(session);
-        const now = new Date().getTime();
-        
-        // Check if session is expired (24 hours)
-        if (now > sessionData.expires) {
-            logout();
-            return false;
-        }
-        
-        return sessionData.authenticated === true;
-    } catch (e) {
+        return JSON.parse(localStorage.getItem(LOGIN_ATTEMPTS_KEY)) || { count: 0, lockedUntil: 0 };
+    } catch (_) {
+        return { count: 0, lockedUntil: 0 };
+    }
+}
+
+function setAttempts(count, lockedUntil = 0) {
+    localStorage.setItem(LOGIN_ATTEMPTS_KEY, JSON.stringify({ count, lockedUntil }));
+}
+
+function clearAttempts() {
+    localStorage.removeItem(LOGIN_ATTEMPTS_KEY);
+}
+
+function getLockoutRemaining() {
+    const { lockedUntil } = getAttempts();
+    const remaining = lockedUntil - Date.now();
+    if (remaining <= 0 && lockedUntil !== 0) clearAttempts();
+    return Math.max(remaining, 0);
+}
+
+function formatTime(ms) {
+    const s = Math.ceil(ms / 1000);
+    const m = Math.floor(s / 60);
+    return m > 0 ? `${m}m ${s % 60}s` : `${s}s`;
+}
+
+// Call server to verify token is still valid
+async function verifyToken(token) {
+    try {
+        const res = await fetch('/auth/verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token })
+        });
+        const data = await res.json();
+        return data.valid === true;
+    } catch (_) {
         return false;
     }
 }
 
-// Login function
-function login(username, password) {
-    if (username === ADMIN_CREDENTIALS.username && password === ADMIN_CREDENTIALS.password) {
-        const now = new Date().getTime();
-        const expires = now + (24 * 60 * 60 * 1000); // 24 hours
-        
-        const sessionData = {
-            authenticated: true,
-            username: username,
-            email: ADMIN_CREDENTIALS.email,
-            loginTime: now,
-            expires: expires
-        };
-        
-        localStorage.setItem('akay_session', JSON.stringify(sessionData));
-        return true;
-    }
-    return false;
+async function isAuthenticated() {
+    const token = getToken();
+    if (!token) return false;
+    return await verifyToken(token);
 }
 
-// Logout function
+async function login(password) {
+    const lockoutRemaining = getLockoutRemaining();
+    if (lockoutRemaining > 0) {
+        return { success: false, reason: 'locked', remaining: formatTime(lockoutRemaining) };
+    }
+
+    try {
+        const res = await fetch('/auth/login', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ password })
+        });
+        const data = await res.json();
+
+        if (data.success && data.token) {
+            sessionStorage.setItem(SESSION_KEY, data.token);
+            clearAttempts();
+            return { success: true };
+        }
+    } catch (_) {}
+
+    const attempts = getAttempts();
+    const nextCount = attempts.count + 1;
+
+    if (nextCount >= MAX_ATTEMPTS) {
+        setAttempts(nextCount, Date.now() + LOCKOUT_MS);
+        return { success: false, reason: 'locked', remaining: formatTime(LOCKOUT_MS) };
+    }
+
+    setAttempts(nextCount);
+    return { success: false, reason: 'invalid', attemptsLeft: MAX_ATTEMPTS - nextCount };
+}
+
 function logout() {
-    localStorage.removeItem('akay_session');
+    sessionStorage.removeItem(SESSION_KEY);
     window.location.href = 'login.html';
 }
 
-// Get current user info
 function getCurrentUser() {
-    const session = localStorage.getItem('akay_session');
-    if (!session) return null;
-    
-    try {
-        const sessionData = JSON.parse(session);
-        return {
-            username: sessionData.username,
-            email: sessionData.email,
-            loginTime: new Date(sessionData.loginTime).toLocaleString()
-        };
-    } catch (e) {
-        return null;
-    }
+    return { username: 'Admin' };
 }
 
-// Protect page - redirect to login if not authenticated
-function requireAuth() {
-    if (!isAuthenticated()) {
+async function requireAuth() {
+    const ok = await isAuthenticated();
+    if (!ok) {
         window.location.href = 'login.html';
     }
 }
-
-// Auto-logout on session expiry
-setInterval(() => {
-    if (!isAuthenticated()) {
-        const currentPage = window.location.pathname;
-        if (!currentPage.includes('login.html')) {
-            logout();
-        }
-    }
-}, 60000); // Check every minute

@@ -5,7 +5,7 @@
 const SESSION_KEY = 'akay_token';
 const LOGIN_ATTEMPTS_KEY = 'akay_attempts';
 const MAX_ATTEMPTS = 5;
-const LOCKOUT_MS = 15 * 60 * 1000;
+const LOCKOUT_MS = 5 * 60 * 1000;
 
 function getToken() {
     return sessionStorage.getItem(SESSION_KEY);

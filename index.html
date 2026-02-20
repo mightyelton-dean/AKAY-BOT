@@ -187,14 +187,21 @@
                             <div class="connect-method-card" id="pairingMethodCard">
                                 <div class="method-icon">🔢</div>
                                 <h3>Pairing Code</h3>
-                                <p>Enter your WhatsApp number</p>
-                                <div style="margin-top:12px; display:flex; gap:8px;">
+                                <p style="font-size:12px; color:var(--color-text-secondary); margin-bottom:8px;">
+                                    Enter the WhatsApp number on <strong>this phone</strong> (the bot number)
+                                </p>
+                                <div style="margin-top:8px; display:flex; gap:8px;">
                                     <input type="tel" id="pairingPhoneInput" class="form-control"
-                                        placeholder="+234 901 234 5678"
-                                        style="flex:1; font-size:13px;"
+                                        placeholder="2348012345678"
+                                        style="flex:1; font-size:14px; letter-spacing:1px;"
+                                        oninput="previewPhoneNumber(this)"
                                         onkeydown="if(event.key==='Enter') requestPairingCode()">
                                     <button class="btn-primary" onclick="requestPairingCode()">Get Code</button>
                                 </div>
+                                <div id="phonePreview" style="font-size:11px; color:var(--color-text-secondary); margin-top:6px; min-height:16px;"></div>
+                                <p style="font-size:11px; color:var(--color-warning); margin-top:6px;">
+                                    ⚠️ Must match the WhatsApp number registered on the bot's SIM card
+                                </p>
                             </div>
                         </div>
 
@@ -221,12 +228,16 @@
                         <div class="instruction-block" style="margin-top:16px;">
                             <strong>Option B — Pairing Code</strong>
                             <ol>
-                                <li>Enter your WhatsApp phone number</li>
-                                <li>Click <em>Get Code</em></li>
-                                <li>Open WhatsApp → <strong>Settings → Linked Devices</strong></li>
-                                <li>Tap <strong>Link a Device → Link with phone number instead</strong></li>
-                                <li>Enter the 8-digit code</li>
+                                <li>Enter the <strong>bot's WhatsApp number</strong> (e.g. <code>2348012345678</code>)</li>
+                                <li>Click <em>Get Code</em> — wait up to 10 seconds</li>
+                                <li>On the bot's phone, open WhatsApp</li>
+                                <li>Tap ⋮ Menu → <strong>Linked Devices → Link a Device</strong></li>
+                                <li>Tap <strong>"Link with phone number instead"</strong></li>
+                                <li>Enter the 8-digit code shown here</li>
                             </ol>
+                            <p style="font-size:11px; color:var(--color-danger); margin-top:8px; font-weight:600;">
+                                ❗ The number in step 1 must be the SAME number as the SIM in the bot's phone
+                            </p>
                         </div>
                     </div>
                 </div>

@@ -167,6 +167,18 @@ body {
     background: var(--color-bg);
     color: var(--color-accent);
 }
+/* Explicit SVG color inheritance fix */
+.nav-item svg {
+    flex-shrink: 0;
+    color: inherit;
+    stroke: currentColor;
+    display: block;
+}
+.nav-item:hover svg,
+.nav-item.active svg {
+    color: inherit;
+}
+
 
 .sidebar-footer {
     padding: 16px;

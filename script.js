@@ -508,23 +508,46 @@ function showConnectBanner(type, message) {
 }
 
 async function requestQR() {
-    showConnectBanner('loading', '⏳ Generating QR code...');
+    showConnectBanner('loading', '⏳ Starting bot...');
     document.getElementById('connectActions').style.display = 'none';
 
     try {
-        // Check current status first
         const status = await api('/api/connection');
         if (status.status === 'connected') {
             updateConnectUI(status);
             return;
         }
-        // If disconnected, trigger reconnect to get a fresh QR
-        if (status.status === 'disconnected') {
-            await api('/api/connection/reconnect', { method: 'POST' });
-            showConnectBanner('loading', '⏳ Starting bot, QR will appear shortly...');
-        }
-        // Start polling — QR will show automatically when ready
-        startConnectionPoller();
+
+        // Clear any existing QR/pairing first then trigger fresh bot start
+        await api('/api/connection/reconnect', { method: 'POST' });
+        showConnectBanner('loading', '⏳ Waiting for QR code (up to 15s)...');
+
+        // Poll every 2 seconds for up to 30 seconds
+        let attempts = 0;
+        const maxAttempts = 15;
+        const poll = setInterval(async () => {
+            attempts++;
+            try {
+                const s = await api('/api/connection');
+                if (s.status === 'connected') {
+                    clearInterval(poll);
+                    updateConnectUI(s);
+                    return;
+                }
+                if (s.status === 'qr' && s.qrCode) {
+                    clearInterval(poll);
+                    updateConnectUI(s);
+                    showConnectBanner('loading', '📸 Scan the QR code with WhatsApp → Settings → Linked Devices → Link a Device');
+                    startConnectionPoller();
+                    return;
+                }
+            } catch (_) {}
+            if (attempts >= maxAttempts) {
+                clearInterval(poll);
+                showConnectBanner('error', '❌ QR not generated. Check Railway logs and try again.');
+                document.getElementById('connectActions').style.display = 'block';
+            }
+        }, 2000);
     } catch (err) {
         showConnectBanner('error', '❌ ' + err.message);
         document.getElementById('connectActions').style.display = 'block';
@@ -533,45 +556,67 @@ async function requestQR() {
 
 async function requestPairingCode() {
     const input = document.getElementById('pairingPhoneInput');
-    const phone = input.value.replace(/[^0-9]/g, '');
+    // Strip everything except digits
+    let phone = input.value.replace(/[^0-9]/g, '');
+
+    // Auto-add country code 234 if starts with 0 (Nigerian number)
+    if (phone.startsWith('0') && phone.length === 11) {
+        phone = '234' + phone.slice(1);
+    }
+
     if (!phone || phone.length < 10) {
-        showConnectBanner('error', '❌ Enter a valid phone number with country code (e.g. 2349012345678)');
+        showConnectBanner('error', '❌ Enter your WhatsApp number with country code. Example: 2348012345678');
         return;
     }
 
-    showConnectBanner('loading', '⏳ Requesting pairing code...');
     document.getElementById('connectActions').style.display = 'none';
 
     try {
-        // If disconnected, reconnect first so socket is ready
         const status = await api('/api/connection');
-        if (status.status === 'disconnected') {
-            showConnectBanner('loading', '⏳ Starting bot, please wait...');
-            await api('/api/connection/reconnect', { method: 'POST' });
-            // Wait 5 seconds for socket to initialize
-            await new Promise(resolve => setTimeout(resolve, 5000));
-        }
 
         if (status.status === 'connected') {
-            showConnectBanner('error', '❌ Already connected. Disconnect first to re-pair.');
+            showConnectBanner('error', '❌ Already connected. Disconnect first then try pairing.');
             document.getElementById('connectActions').style.display = 'block';
             return;
         }
 
-        showConnectBanner('loading', '⏳ Generating pairing code...');
+        // Start fresh bot then immediately request pairing code
+        // (pairing code must be requested BEFORE QR is shown)
+        showConnectBanner('loading', '⏳ Starting bot...');
+        await api('/api/connection/reconnect', { method: 'POST' });
+
+        // Wait for socket to open (bot needs ~3-6 seconds to initialize)
+        showConnectBanner('loading', '⏳ Waiting for connection (up to 10s)...');
+        let waited = 0;
+        while (waited < 10000) {
+            await new Promise(r => setTimeout(r, 1000));
+            waited += 1000;
+            try {
+                const s = await api('/api/connection');
+                if (s.status === 'connected') { updateConnectUI(s); return; }
+                // Once socket is connecting/qr, we can request pairing code
+                if (s.status === 'connecting' || s.status === 'qr') break;
+            } catch (_) {}
+        }
+
+        showConnectBanner('loading', `⏳ Requesting pairing code for ${phone}...`);
         const data = await api('/api/connection/pair', {
             method: 'POST',
             body: JSON.stringify({ phoneNumber: phone })
         });
 
-        if (data.success) {
-            document.getElementById('pairingCodeDisplay').textContent = data.pairingCode;
+        if (data.success && data.pairingCode) {
+            const code = data.pairingCode;
+            document.getElementById('pairingCodeDisplay').textContent = code;
             document.getElementById('pairingWrapper').style.display = 'block';
             document.getElementById('connectActions').style.display = 'none';
-            showConnectBanner('loading', '🔢 Enter this code in WhatsApp → Settings → Linked Devices → Link with phone number instead');
+            showConnectBanner('loading',
+                '📱 Open WhatsApp → Menu (⋮) → Linked Devices → Link a Device → "Link with phone number instead" → enter this code'
+            );
             startConnectionPoller();
         } else {
-            showConnectBanner('error', '❌ ' + (data.error || 'Failed to get pairing code'));
+            const errMsg = data.error || 'Failed to get pairing code';
+            showConnectBanner('error', `❌ ${errMsg}`);
             document.getElementById('connectActions').style.display = 'block';
         }
     } catch (err) {
@@ -610,6 +655,30 @@ function stopConnectionPoller() {
     }
 }
 
+
+
+// ── Live phone number preview ─────────────────────────────────────────────────
+function previewPhoneNumber(input) {
+    const raw = input.value.replace(/[^0-9]/g, '');
+    const preview = document.getElementById('phonePreview');
+    if (!preview) return;
+
+    if (!raw) { preview.textContent = ''; return; }
+
+    let formatted = raw;
+    // Auto-fix: Nigerian 080/090/081 → 234...
+    if (raw.startsWith('0') && raw.length <= 11) {
+        formatted = '234' + raw.slice(1);
+    }
+    // Show formatted version
+    if (formatted.length >= 10) {
+        preview.innerHTML = `✓ Will use: <strong>+${formatted}</strong> &nbsp;(${formatted.length} digits)`;
+        preview.style.color = 'var(--color-success)';
+    } else {
+        preview.innerHTML = `Formatted: +${formatted} &nbsp;— need ${10 - formatted.length} more digits`;
+        preview.style.color = 'var(--color-warning)';
+    }
+}
 
 // ── Close sidebar on nav click (mobile) ──────────────────────────────────────
 document.querySelectorAll('.nav-item').forEach(item => {

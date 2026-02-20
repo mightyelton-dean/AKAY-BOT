@@ -7,6 +7,34 @@
     <link rel="stylesheet" href="style.css">
     <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
     <script src="auth.js"></script>
+
+    <script>
+        // Inline sidebar toggle - must be available before script.js loads
+        function toggleSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            var btn = document.getElementById('hamburgerBtn');
+            if (!sidebar) return;
+            var isOpen = sidebar.classList.contains('open');
+            if (isOpen) {
+                closeSidebar();
+            } else {
+                sidebar.classList.add('open');
+                if (overlay) { overlay.style.display = 'block'; setTimeout(function(){ overlay.classList.add('active'); }, 10); }
+                if (btn) btn.classList.add('open');
+                document.body.style.overflow = 'hidden';
+            }
+        }
+        function closeSidebar() {
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('sidebarOverlay');
+            var btn = document.getElementById('hamburgerBtn');
+            if (sidebar) sidebar.classList.remove('open');
+            if (overlay) { overlay.classList.remove('active'); setTimeout(function(){ overlay.style.display = 'none'; }, 300); }
+            if (btn) btn.classList.remove('open');
+            document.body.style.overflow = '';
+        }
+    </script>
 </head>
 <body>
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>

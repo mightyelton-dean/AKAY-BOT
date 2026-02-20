@@ -1,7 +1,7 @@
 // AKAY Bot Dashboard - Main Script
 // All data fetched from real backend via /api/*
 
-const BACKEND = ''; // empty = same origin (proxied by server.js)
+const BACKEND = 'https://talented-connection-env.up.railway.app'; // direct backend URL
 
 // ── API helper ────────────────────────────────────────────────────────────────
 async function api(path, options = {}) {
@@ -456,7 +456,25 @@ function showConnectBanner(type, message) {
 async function requestQR() {
     showConnectBanner('loading', '⏳ Generating QR code...');
     document.getElementById('connectActions').style.display = 'none';
-    startConnectionPoller(); // start polling for QR
+
+    try {
+        // Check current status first
+        const status = await api('/api/connection');
+        if (status.status === 'connected') {
+            updateConnectUI(status);
+            return;
+        }
+        // If disconnected, trigger reconnect to get a fresh QR
+        if (status.status === 'disconnected') {
+            await api('/api/connection/reconnect', { method: 'POST' });
+            showConnectBanner('loading', '⏳ Starting bot, QR will appear shortly...');
+        }
+        // Start polling — QR will show automatically when ready
+        startConnectionPoller();
+    } catch (err) {
+        showConnectBanner('error', '❌ ' + err.message);
+        document.getElementById('connectActions').style.display = 'block';
+    }
 }
 
 async function requestPairingCode() {
@@ -468,8 +486,25 @@ async function requestPairingCode() {
     }
 
     showConnectBanner('loading', '⏳ Requesting pairing code...');
+    document.getElementById('connectActions').style.display = 'none';
 
     try {
+        // If disconnected, reconnect first so socket is ready
+        const status = await api('/api/connection');
+        if (status.status === 'disconnected') {
+            showConnectBanner('loading', '⏳ Starting bot, please wait...');
+            await api('/api/connection/reconnect', { method: 'POST' });
+            // Wait 5 seconds for socket to initialize
+            await new Promise(resolve => setTimeout(resolve, 5000));
+        }
+
+        if (status.status === 'connected') {
+            showConnectBanner('error', '❌ Already connected. Disconnect first to re-pair.');
+            document.getElementById('connectActions').style.display = 'block';
+            return;
+        }
+
+        showConnectBanner('loading', '⏳ Generating pairing code...');
         const data = await api('/api/connection/pair', {
             method: 'POST',
             body: JSON.stringify({ phoneNumber: phone })
@@ -479,8 +514,8 @@ async function requestPairingCode() {
             document.getElementById('pairingCodeDisplay').textContent = data.pairingCode;
             document.getElementById('pairingWrapper').style.display = 'block';
             document.getElementById('connectActions').style.display = 'none';
-            showConnectBanner('loading', '🔢 Enter this code in WhatsApp');
-            startConnectionPoller(); // poll until connected
+            showConnectBanner('loading', '🔢 Enter this code in WhatsApp → Settings → Linked Devices → Link with phone number instead');
+            startConnectionPoller();
         } else {
             showConnectBanner('error', '❌ ' + (data.error || 'Failed to get pairing code'));
             document.getElementById('connectActions').style.display = 'block';
@@ -520,3 +555,26 @@ function stopConnectionPoller() {
         connectionPoller = null;
     }
 }
+
+// ── Auto-init: check connection on load and start polling ─────────────────────
+(async function autoInit() {
+    try {
+        const data = await api('/api/connection');
+        // If not connected, auto-navigate to Connect page and start polling
+        if (data.status !== 'connected') {
+            // Show connect page automatically
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            const connectNav = document.querySelector('[data-page="connect"]');
+            if (connectNav) connectNav.classList.add('active');
+            document.querySelectorAll('.content').forEach(c => c.style.display = 'none');
+            const connectPage = document.getElementById('connect-page');
+            if (connectPage) connectPage.style.display = 'block';
+            document.querySelector('.page-title').textContent = 'Connect WhatsApp';
+        }
+        updateConnectUI(data);
+        // Always start polling so QR/pairing updates automatically
+        startConnectionPoller();
+    } catch (err) {
+        console.warn('Auto-init failed:', err.message);
+    }
+})();

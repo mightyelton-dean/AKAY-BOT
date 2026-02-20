@@ -9,7 +9,8 @@
     <script src="auth.js"></script>
 </head>
 <body>
-    <aside class="sidebar">
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <div class="logo">
                 <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
@@ -66,6 +67,11 @@
     <main class="main-content">
         <header class="header">
             <div class="header-left">
+                <button class="hamburger-btn" id="hamburgerBtn" onclick="toggleSidebar()" aria-label="Toggle menu">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
                 <h1 class="page-title">Dashboard</h1>
                 <div class="status-badge disconnected" id="connectionStatus">
                     <span class="status-dot"></span>

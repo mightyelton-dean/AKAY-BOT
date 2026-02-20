@@ -3,6 +3,46 @@
 
 const BACKEND = 'https://talented-connection-env.up.railway.app'; // direct backend URL
 
+// ── Mobile Sidebar Toggle ─────────────────────────────────────────────────────
+function toggleSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const btn = document.getElementById('hamburgerBtn');
+    const isOpen = sidebar.classList.contains('open');
+    if (isOpen) {
+        closeSidebar();
+    } else {
+        sidebar.classList.add('open');
+        overlay.classList.add('active');
+        btn.classList.add('open');
+        document.body.style.overflow = 'hidden';
+    }
+}
+
+function closeSidebar() {
+    const sidebar = document.getElementById('sidebar');
+    const overlay = document.getElementById('sidebarOverlay');
+    const btn = document.getElementById('hamburgerBtn');
+    sidebar.classList.remove('open');
+    overlay.classList.remove('active');
+    btn.classList.remove('open');
+    document.body.style.overflow = '';
+}
+
+// Close sidebar when a nav item is clicked on mobile
+document.addEventListener('DOMContentLoaded', () => {
+    document.querySelectorAll('.nav-item').forEach(item => {
+        item.addEventListener('click', () => {
+            if (window.innerWidth <= 768) closeSidebar();
+        });
+    });
+    // Close on resize if desktop
+    window.addEventListener('resize', () => {
+        if (window.innerWidth > 768) closeSidebar();
+    });
+});
+
+
 // ── API helper ────────────────────────────────────────────────────────────────
 async function api(path, options = {}) {
     const res = await fetch(BACKEND + path, {

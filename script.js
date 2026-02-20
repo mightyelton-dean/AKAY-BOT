@@ -556,24 +556,29 @@ function stopConnectionPoller() {
     }
 }
 
-// ── Auto-init: check connection on load and start polling ─────────────────────
+// ── Auto-init: silently check status only — never auto-trigger QR ────────────
 (async function autoInit() {
     try {
         const data = await api('/api/connection');
-        // If not connected, auto-navigate to Connect page and start polling
-        if (data.status !== 'connected') {
-            // Show connect page automatically
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            const connectNav = document.querySelector('[data-page="connect"]');
-            if (connectNav) connectNav.classList.add('active');
-            document.querySelectorAll('.content').forEach(c => c.style.display = 'none');
+        // Only update UI if already in an active state (connected/qr/pairing)
+        // Never auto-trigger QR — user must choose QR or Pairing Code themselves
+        if (data.status === 'connected') {
+            updateConnectionUI(true);
+            // If user is on connect page, show connected state
             const connectPage = document.getElementById('connect-page');
-            if (connectPage) connectPage.style.display = 'block';
-            document.querySelector('.page-title').textContent = 'Connect WhatsApp';
+            if (connectPage && connectPage.style.display !== 'none') {
+                updateConnectUI(data);
+            }
+        } else if (data.status === 'qr' || data.status === 'pairing') {
+            // Already in progress — resume polling so UI catches up
+            // but only if user is already on the connect page
+            const connectPage = document.getElementById('connect-page');
+            if (connectPage && connectPage.style.display !== 'none') {
+                updateConnectUI(data);
+                startConnectionPoller();
+            }
         }
-        updateConnectUI(data);
-        // Always start polling so QR/pairing updates automatically
-        startConnectionPoller();
+        // If disconnected — do nothing, let user choose their method
     } catch (err) {
         console.warn('Auto-init failed:', err.message);
     }

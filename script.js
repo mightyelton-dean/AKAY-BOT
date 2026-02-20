@@ -28,10 +28,17 @@ function applyTheme(mode) {
 }
 
 function updateThemeBtns(mode) {
+    // Update sidebar buttons
     document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
     const map = { light: 'themeBtnLight', dark: 'themeBtnDark', system: 'themeBtnSystem' };
     const btn = document.getElementById(map[mode]);
     if (btn) btn.classList.add('active');
+
+    // Update header buttons
+    document.querySelectorAll('.header-theme-btn').forEach(b => b.classList.remove('active'));
+    const hmap = { light: 'hThemeBtnLight', dark: 'hThemeBtnDark', system: 'hThemeBtnSystem' };
+    const hbtn = document.getElementById(hmap[mode]);
+    if (hbtn) hbtn.classList.add('active');
 }
 
 function initTheme() {

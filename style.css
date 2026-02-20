@@ -19,6 +19,81 @@
     --radius-lg: 12px;
     --transition: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
 }
+/* ── Dark Mode Variables ───────────────────────────────────────────────────── */
+[data-theme="dark"] {
+    --color-bg: #0a0a0a;
+    --color-surface: #141414;
+    --color-border: #262626;
+    --color-border-hover: #404040;
+    --color-text-primary: #fafafa;
+    --color-text-secondary: #a3a3a3;
+    --color-text-tertiary: #525252;
+    --color-accent: #ffffff;
+    --color-accent-hover: #e5e5e5;
+    --color-success: #22c55e;
+    --color-success-bg: #052e16;
+    --color-warning: #f97316;
+    --color-danger: #ef4444;
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.4);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
+}
+
+/* ── Theme Toggle Button ───────────────────────────────────────────────────── */
+.theme-switcher {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    background: var(--color-bg);
+    border: 1px solid var(--color-border);
+    border-radius: 999px;
+    padding: 3px;
+    margin-bottom: 10px;
+    width: 100%;
+}
+.theme-btn {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 5px;
+    padding: 5px 8px;
+    border: none;
+    background: none;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--color-text-secondary);
+    transition: all 0.2s ease;
+    white-space: nowrap;
+}
+.theme-btn:hover { color: var(--color-text-primary); }
+.theme-btn.active {
+    background: var(--color-surface);
+    color: var(--color-text-primary);
+    box-shadow: 0 1px 4px rgba(0,0,0,0.15);
+    border: 1px solid var(--color-border);
+}
+[data-theme="dark"] .theme-btn.active {
+    box-shadow: 0 1px 4px rgba(0,0,0,0.5);
+}
+.theme-btn svg { flex-shrink: 0; }
+
+/* ── Dark mode overrides for components ───────────────────────────────────── */
+[data-theme="dark"] .login-card { background: var(--color-surface); }
+[data-theme="dark"] .error-message { background: #1f0a0a; border-color: #7f1d1d; }
+[data-theme="dark"] .import-status.loading { background: #1c1400; border-color: #854d0e; color: #fde68a; }
+[data-theme="dark"] .import-status.success { background: var(--color-success-bg); border-color: #166534; }
+[data-theme="dark"] .import-status.error { background: #1f0a0a; border-color: #7f1d1d; }
+[data-theme="dark"] .connect-banner.loading { background: #1c1400; border-color: #854d0e; color: #fde68a; }
+[data-theme="dark"] .connect-banner.error { background: #1f0a0a; border-color: #7f1d1d; }
+[data-theme="dark"] .connect-banner.success { background: var(--color-success-bg); border-color: #166534; }
+[data-theme="dark"] .message-bubble.inbound { background: #1a1a1a; border-color: var(--color-border); }
+[data-theme="dark"] .hamburger-btn { background: #fff; box-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+[data-theme="dark"] .hamburger-btn span { background: #111; }
+[data-theme="dark"] .hamburger-btn:hover { box-shadow: 0 0 0 2px #111, 0 0 16px rgba(0,0,0,0.4); }
+[data-theme="dark"] .hamburger-btn.open { background: #eee; }
+
 
 * {
     margin: 0;

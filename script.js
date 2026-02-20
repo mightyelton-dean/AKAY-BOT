@@ -3,6 +3,52 @@
 
 const BACKEND = 'https://talented-connection-env.up.railway.app'; // direct backend URL
 
+// ── Theme System (Light / Dark / System) ─────────────────────────────────────
+function setTheme(mode) {
+    localStorage.setItem('qurnex-theme', mode);
+    applyTheme(mode);
+    updateThemeBtns(mode);
+}
+
+function applyTheme(mode) {
+    const root = document.documentElement;
+    if (mode === 'dark') {
+        root.setAttribute('data-theme', 'dark');
+    } else if (mode === 'light') {
+        root.removeAttribute('data-theme');
+    } else {
+        // System: follow OS preference
+        const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+        if (prefersDark) {
+            root.setAttribute('data-theme', 'dark');
+        } else {
+            root.removeAttribute('data-theme');
+        }
+    }
+}
+
+function updateThemeBtns(mode) {
+    document.querySelectorAll('.theme-btn').forEach(b => b.classList.remove('active'));
+    const map = { light: 'themeBtnLight', dark: 'themeBtnDark', system: 'themeBtnSystem' };
+    const btn = document.getElementById(map[mode]);
+    if (btn) btn.classList.add('active');
+}
+
+function initTheme() {
+    const saved = localStorage.getItem('qurnex-theme') || 'system';
+    applyTheme(saved);
+    updateThemeBtns(saved);
+    // Listen for OS theme changes when in system mode
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+        const current = localStorage.getItem('qurnex-theme') || 'system';
+        if (current === 'system') applyTheme('system');
+    });
+}
+
+// Init theme immediately on load
+initTheme();
+
+
 
 // ── API helper ────────────────────────────────────────────────────────────────
 async function api(path, options = {}) {

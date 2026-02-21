@@ -83,6 +83,7 @@ document.querySelectorAll('.nav-item').forEach((item) => {
         if (page === 'overview') loadDashboard();
         if (page === 'conversations') loadConversations();
         if (page === 'knowledge') loadKnowledgeBase();
+        if (page === 'conversations') { loadConversations(); loadHandoffs(); }
         if (page === 'sessions') loadSessions();
     });
 });
@@ -192,10 +193,13 @@ async function loadKnowledgeBase() {
         }
         tbody.innerHTML = data.entries.map(e => `
             <tr>
-                <td>${escHtml(e.question)}</td>
-                <td>${escHtml(e.answer.substring(0, 80))}${e.answer.length > 80 ? '...' : ''}</td>
+                <td style="max-width:200px;">${escHtml(e.question)}</td>
+                <td style="max-width:280px;color:var(--color-text-secondary);font-size:13px;">${escHtml(e.answer.substring(0, 100))}${e.answer.length > 100 ? '…' : ''}</td>
                 <td><span class="badge">${e.category || 'general'}</span></td>
-                <td>
+                <td style="white-space:nowrap;">
+                    <button class="btn-icon-small" onclick="editKB(${e.id}, ${JSON.stringify(escHtml(e.question))}, ${JSON.stringify(escHtml(e.answer))}, '${e.category || 'general'}')" title="Edit" style="margin-right:4px;">
+                        <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M9.5 2.5L11.5 4.5L4.5 11.5H2.5V9.5L9.5 2.5Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+                    </button>
                     <button class="btn-icon-small danger" onclick="deleteKB(${e.id})" title="Delete">
                         <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M2 3.5H12M5 3.5V2.5H9V3.5M5.5 6V10.5M8.5 6V10.5M3 3.5L3.5 11.5H10.5L11 3.5H3Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
                     </button>
@@ -211,10 +215,69 @@ async function deleteKB(id) {
     if (!confirm('Delete this FAQ entry?')) return;
     try {
         await api(`/api/knowledge-base/${id}`, { method: 'DELETE' });
+        showToast('FAQ entry deleted');
         loadKnowledgeBase();
     } catch (err) {
         alert('Failed to delete: ' + err.message);
     }
+}
+
+function editKB(id, question, answer, category) {
+    // Fill the Add form with existing data and switch to edit mode
+    document.getElementById('kbQuestion').value = question;
+    document.getElementById('kbAnswer').value = answer;
+    document.getElementById('kbCategory').value = category || 'general';
+
+    // Change button to Save Edit
+    const btn = document.querySelector('#knowledge-page .btn-primary');
+    btn.textContent = 'Save Changes';
+    btn.onclick = () => saveKBEdit(id);
+
+    // Add cancel button if not already there
+    if (!document.getElementById('kbCancelBtn')) {
+        const cancel = document.createElement('button');
+        cancel.id = 'kbCancelBtn';
+        cancel.className = 'btn-secondary';
+        cancel.textContent = 'Cancel';
+        cancel.style.marginLeft = '8px';
+        cancel.onclick = cancelKBEdit;
+        btn.after(cancel);
+    }
+
+    // Scroll to form
+    document.getElementById('kbQuestion').scrollIntoView({ behavior: 'smooth', block: 'center' });
+    document.getElementById('kbQuestion').focus();
+    showToast('Editing FAQ — make changes and click Save');
+}
+
+async function saveKBEdit(id) {
+    const question = document.getElementById('kbQuestion').value.trim();
+    const answer = document.getElementById('kbAnswer').value.trim();
+    const category = document.getElementById('kbCategory').value;
+
+    if (!question || !answer) return alert('Question and answer are required');
+
+    try {
+        await api(`/api/knowledge-base/${id}`, {
+            method: 'PUT',
+            body: JSON.stringify({ question, answer, category })
+        });
+        showToast('FAQ entry updated ✓');
+        cancelKBEdit();
+        loadKnowledgeBase();
+    } catch (err) {
+        alert('Failed to update: ' + err.message);
+    }
+}
+
+function cancelKBEdit() {
+    document.getElementById('kbQuestion').value = '';
+    document.getElementById('kbAnswer').value = '';
+    const btn = document.querySelector('#knowledge-page .btn-primary');
+    btn.textContent = 'Add Entry';
+    btn.onclick = addKBEntry;
+    const cancel = document.getElementById('kbCancelBtn');
+    if (cancel) cancel.remove();
 }
 
 async function addKBEntry() {
@@ -678,6 +741,117 @@ function previewPhoneNumber(input) {
         preview.innerHTML = `Formatted: +${formatted} &nbsp;— need ${10 - formatted.length} more digits`;
         preview.style.color = 'var(--color-warning)';
     }
+}
+
+
+// ── Human Handoff ─────────────────────────────────────────────────────────────
+let currentChatUserId = null;
+
+async function loadHandoffs() {
+    try {
+        const data = await api('/api/handoff');
+        const list = document.getElementById('handoffList');
+        if (!list) return;
+        if (!data.handoffs || data.handoffs.length === 0) {
+            list.innerHTML = '<p style="font-size:12px; color:var(--color-text-tertiary); margin:0;">No active handoffs — bot is handling all chats.</p>';
+            return;
+        }
+        list.innerHTML = `
+            <p style="font-size:12px; font-weight:600; margin:0 0 8px; color:var(--color-warning);">
+                👤 ${data.handoffs.length} chat(s) in human mode:
+            </p>
+            ${data.handoffs.map(u => `
+                <div style="display:flex; align-items:center; justify-content:space-between; padding:6px 10px; background:var(--color-bg); border-radius:6px; margin-bottom:4px;">
+                    <span style="font-size:13px; font-family:monospace;">+${u.replace('@s.whatsapp.net','').replace('@c.us','')}</span>
+                    <button class="btn-sm btn-secondary" onclick="releaseSpecific('${u}')">🤖 Release</button>
+                </div>
+            `).join('')}
+            <button class="btn-sm btn-secondary" onclick="releaseAll()" style="margin-top:8px; width:100%;">
+                🤖 Release ALL to bot
+            </button>
+        `;
+    } catch (_) {}
+}
+
+async function takeoverChat() {
+    let num = document.getElementById('handoffNumber')?.value?.replace(/[^0-9]/g, '') || '';
+    if (num.startsWith('0') && num.length === 11) num = '234' + num.slice(1);
+    if (!num || num.length < 10) return showHandoffBanner('Enter a valid WhatsApp number', 'error');
+
+    const userId = num + '@s.whatsapp.net';
+    try {
+        await api('/api/handoff/takeover', { method: 'POST', body: JSON.stringify({ userId }) });
+        showHandoffBanner(`✓ You now control +${num}. Bot is silent for this chat.`, 'success');
+        document.getElementById('handoffNumber').value = '';
+        loadHandoffs();
+    } catch (err) {
+        showHandoffBanner('Failed: ' + err.message, 'error');
+    }
+}
+
+async function releaseChat() {
+    let num = document.getElementById('handoffNumber')?.value?.replace(/[^0-9]/g, '') || '';
+    if (num.startsWith('0') && num.length === 11) num = '234' + num.slice(1);
+    if (!num || num.length < 10) return showHandoffBanner('Enter a valid WhatsApp number', 'error');
+
+    const userId = num + '@s.whatsapp.net';
+    try {
+        await api('/api/handoff/release', { method: 'POST', body: JSON.stringify({ userId }) });
+        showHandoffBanner(`✓ Bot resumed for +${num}`, 'success');
+        document.getElementById('handoffNumber').value = '';
+        loadHandoffs();
+    } catch (err) {
+        showHandoffBanner('Failed: ' + err.message, 'error');
+    }
+}
+
+async function releaseSpecific(userId) {
+    try {
+        await api('/api/handoff/release', { method: 'POST', body: JSON.stringify({ userId }) });
+        loadHandoffs();
+        showHandoffBanner('✓ Bot resumed', 'success');
+    } catch (_) {}
+}
+
+async function releaseAll() {
+    if (!confirm('Release ALL chats back to bot?')) return;
+    try {
+        await api('/api/handoff/release-all', { method: 'POST' });
+        showHandoffBanner('✓ Bot resumed for all chats', 'success');
+        loadHandoffs();
+    } catch (_) {}
+}
+
+// Take over from message panel (when viewing a specific chat)
+async function takeoverCurrentChat() {
+    if (!currentChatUserId) return;
+    try {
+        await api('/api/handoff/takeover', { method: 'POST', body: JSON.stringify({ userId: currentChatUserId }) });
+        document.getElementById('takeoverBtn').style.display = 'none';
+        document.getElementById('releaseBtn').style.display = '';
+        showToast('👤 You now control this chat — bot is silent');
+    } catch (_) {}
+}
+
+async function releaseCurrentChat() {
+    if (!currentChatUserId) return;
+    try {
+        await api('/api/handoff/release', { method: 'POST', body: JSON.stringify({ userId: currentChatUserId }) });
+        document.getElementById('takeoverBtn').style.display = '';
+        document.getElementById('releaseBtn').style.display = 'none';
+        showToast('🤖 Bot resumed for this chat');
+    } catch (_) {}
+}
+
+function showHandoffBanner(msg, type) {
+    const el = document.getElementById('handoffBanner');
+    if (!el) return;
+    el.style.display = 'block';
+    el.textContent = msg;
+    el.style.background = type === 'success' ? 'var(--color-success-bg, #f0fdf4)' : 'var(--color-danger-bg, #fef2f2)';
+    el.style.color = type === 'success' ? 'var(--color-success)' : 'var(--color-danger)';
+    el.style.border = `1px solid ${type === 'success' ? 'var(--color-success)' : 'var(--color-danger)'}`;
+    setTimeout(() => { el.style.display = 'none'; }, 4000);
 }
 
 // ── Close sidebar on nav click (mobile) ──────────────────────────────────────

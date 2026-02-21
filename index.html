@@ -278,6 +278,34 @@
 
         <!-- CONVERSATIONS PAGE -->
         <div class="content" id="conversations-page" style="display:none;">
+
+            <!-- Human Handoff Control Panel -->
+            <div class="settings-card" style="margin-bottom:20px;">
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                    <div>
+                        <h3 style="margin:0 0 4px;">🤝 Human Handoff</h3>
+                        <p style="margin:0; font-size:13px; color:var(--color-text-secondary);">Take over a chat manually — bot goes silent. Release to hand back to bot.</p>
+                    </div>
+                    <button class="btn-secondary btn-sm" onclick="loadHandoffs()">Refresh</button>
+                </div>
+
+                <div style="margin-top:16px; display:flex; gap:8px; flex-wrap:wrap;">
+                    <input type="tel" id="handoffNumber" class="form-control"
+                        placeholder="2348012345678 (number to take over)"
+                        style="flex:1; min-width:200px; font-size:13px;">
+                    <button class="btn-primary" onclick="takeoverChat()" style="white-space:nowrap;">
+                        👤 Take Over
+                    </button>
+                    <button class="btn-secondary" onclick="releaseChat()" style="white-space:nowrap;">
+                        🤖 Release to Bot
+                    </button>
+                </div>
+
+                <div id="handoffList" style="margin-top:12px;"></div>
+
+                <div id="handoffBanner" style="display:none; margin-top:10px; padding:10px 14px; border-radius:8px; font-size:13px;"></div>
+            </div>
+
             <div class="conversations-layout">
                 <div class="conversations-sidebar">
                     <div class="page-header">
@@ -297,6 +325,10 @@
                     <div class="message-panel-header">
                         <button class="btn-icon-small" onclick="document.getElementById('messagePanel').style.display='none'">←</button>
                         <span id="messagePanelTitle"></span>
+                        <div style="margin-left:auto; display:flex; gap:6px;">
+                            <button class="btn-sm btn-primary" id="takeoverBtn" onclick="takeoverCurrentChat()" title="Take over this chat">👤 Take Over</button>
+                            <button class="btn-sm btn-secondary" id="releaseBtn" onclick="releaseCurrentChat()" title="Release to bot" style="display:none;">🤖 Release</button>
+                        </div>
                     </div>
                     <div class="messages-list" id="messagesList"></div>
                 </div>

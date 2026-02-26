@@ -326,6 +326,7 @@
                         <button class="btn-icon-small" onclick="document.getElementById('messagePanel').style.display='none'">←</button>
                         <span id="messagePanelTitle"></span>
                         <div style="margin-left:auto; display:flex; gap:6px;">
+                            <button class="btn-sm btn-secondary" id="exportChatBtn" onclick="exportCurrentChat()" title="Export conversation as text">⬇ Export</button>
                             <button class="btn-sm btn-primary" id="takeoverBtn" onclick="takeoverCurrentChat()" title="Take over this chat">👤 Take Over</button>
                             <button class="btn-sm btn-secondary" id="releaseBtn" onclick="releaseCurrentChat()" title="Release to bot" style="display:none;">🤖 Release</button>
                         </div>
@@ -446,32 +447,156 @@
 
         <!-- SETTINGS PAGE -->
         <div class="content" id="settings-page" style="display:none;">
-            <h2>Settings</h2>
-            <div class="settings-card">
-                <h3>AI Configuration</h3>
-                <p class="help-text">These settings are saved locally. To change the actual AI model, update <code>AI_MODEL</code> in your backend <code>.env</code> file.</p>
-                <div class="form-group">
-                    <label>AI Model</label>
-                    <select class="form-control" id="aiModel">
-                        <option value="claude-haiku-4-5">Claude Haiku 4.5 (Fast & Cheap)</option>
-                        <option value="claude-sonnet-4-5">Claude Sonnet 4.5 (Recommended)</option>
-                        <option value="claude-opus-4-5">Claude Opus 4.5 (Most Capable)</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>System Prompt Reference</label>
-                    <textarea class="form-control" rows="6" id="systemPrompt" placeholder="View/note your system prompt here. To change it, edit services/aiService.js in the backend.">You are a helpful WhatsApp AI assistant...</textarea>
-                </div>
-                <button class="btn-primary" onclick="saveSettings()">Save Notes</button>
+            <div class="page-header">
+                <h2>Settings</h2>
+                <p class="help-text" style="margin:0;">Configure your bot behaviour. Changes are applied to Railway environment variables.</p>
             </div>
+
+            <!-- AI Provider & Model -->
             <div class="settings-card">
-                <h3>Backend Connection</h3>
-                <p class="help-text">This dashboard proxies API calls to your Baileys bot backend. Make sure both servers are running.</p>
-                <div class="form-group">
-                    <label>Backend URL (set in dashboard .env)</label>
-                    <input type="text" class="form-control" value="http://localhost:3001" disabled>
+                <h3>🤖 AI Provider & Model</h3>
+                <p class="help-text">Choose your AI provider and model. Groq and Gemini are free. Claude is paid.</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>AI Provider</label>
+                        <select class="form-control" id="settingProvider" onchange="updateModelOptions()">
+                            <option value="groq">Groq (Free — Recommended)</option>
+                            <option value="gemini">Gemini (Free)</option>
+                            <option value="claude">Claude (Paid)</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Model</label>
+                        <select class="form-control" id="settingModel">
+                            <option value="llama-3.3-70b-versatile">llama-3.3-70b-versatile (Best)</option>
+                            <option value="llama-3.1-8b-instant">llama-3.1-8b-instant (Fastest)</option>
+                            <option value="mixtral-8x7b-32768">mixtral-8x7b-32768 (Long context)</option>
+                        </select>
+                    </div>
                 </div>
-                <button class="btn-secondary" onclick="refreshStatus().then(() => showToast('Status refreshed'))">Test Connection</button>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Max Tokens <span class="help-text" style="font-size:11px;">(response length)</span></label>
+                        <input type="number" class="form-control" id="settingMaxTokens" value="1000" min="100" max="4000" step="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Temperature <span class="help-text" style="font-size:11px;">(0 = precise, 1 = creative)</span></label>
+                        <input type="number" class="form-control" id="settingTemperature" value="0.7" min="0" max="1" step="0.1">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bot Identity -->
+            <div class="settings-card">
+                <h3>🏪 Bot Identity</h3>
+                <p class="help-text">How your bot introduces itself and what business info it knows.</p>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Bot Name</label>
+                        <input type="text" class="form-control" id="settingBotName" placeholder="e.g. QURNEX Assistant">
+                    </div>
+                    <div class="form-group">
+                        <label>Business Name</label>
+                        <input type="text" class="form-control" id="settingBusinessName" placeholder="e.g. QURNEX TECHNOLOGY LIMITED">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Business Description</label>
+                    <input type="text" class="form-control" id="settingBusinessDesc" placeholder="e.g. We offer warehousing and fulfilment services...">
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Business Hours</label>
+                        <input type="text" class="form-control" id="settingBusinessHours" placeholder="e.g. Mon-Sat 9AM-5PM">
+                    </div>
+                    <div class="form-group">
+                        <label>Business Phone</label>
+                        <input type="text" class="form-control" id="settingBusinessPhone" placeholder="e.g. 08126928980">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Business Email</label>
+                        <input type="text" class="form-control" id="settingBusinessEmail" placeholder="e.g. hello@qurnex.co">
+                    </div>
+                    <div class="form-group">
+                        <label>Business Location</label>
+                        <input type="text" class="form-control" id="settingBusinessLocation" placeholder="e.g. Festac Town, Lagos">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bot Behaviour -->
+            <div class="settings-card">
+                <h3>⚙️ Bot Behaviour</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Context Message Limit</label>
+                        <input type="number" class="form-control" id="settingContextLimit" value="10" min="1" max="50">
+                        <span class="help-text" style="font-size:11px;">How many past messages the bot remembers per chat</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Rate Limit (msgs/min)</label>
+                        <input type="number" class="form-control" id="settingRateLimit" value="30" min="1" max="100">
+                        <span class="help-text" style="font-size:11px;">Max messages per user per minute</span>
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group toggle-group">
+                        <label>FAQ Matching</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="settingFAQ" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="help-text" style="font-size:11px;">Use knowledge base before calling AI</span>
+                    </div>
+                    <div class="form-group toggle-group">
+                        <label>Intent Classification</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="settingIntent" checked>
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="help-text" style="font-size:11px;">Auto-detect pricing/delivery questions</span>
+                    </div>
+                    <div class="form-group toggle-group">
+                        <label>Debug AI Errors</label>
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="settingDebug">
+                            <span class="toggle-slider"></span>
+                        </label>
+                        <span class="help-text" style="font-size:11px;">Show AI errors in WhatsApp replies</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Save -->
+            <div class="settings-card" style="background: var(--color-bg); border: 1px solid var(--color-border);">
+                <div style="display:flex; align-items:center; justify-content:space-between; flex-wrap:wrap; gap:12px;">
+                    <div>
+                        <p style="font-weight:600; margin:0;">Save Settings</p>
+                        <p class="help-text" style="margin:0; font-size:12px;">Settings are saved to Railway via the backend API. Bot restarts automatically to apply changes.</p>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn-secondary" onclick="loadSettings()">↺ Reload</button>
+                        <button class="btn-primary" onclick="saveSettings()" id="saveSettingsBtn">💾 Save & Apply</button>
+                    </div>
+                </div>
+                <div id="settingsSaveStatus" style="display:none; margin-top:12px; padding:10px 14px; border-radius:8px; font-size:13px;"></div>
+            </div>
+
+            <!-- Connection Info (read-only) -->
+            <div class="settings-card">
+                <h3>🔗 Backend Connection</h3>
+                <p class="help-text">Live connection info — read only.</p>
+                <div class="form-group">
+                    <label>Backend URL</label>
+                    <input type="text" class="form-control" id="settingBackendUrl" disabled>
+                </div>
+                <div style="display:flex; gap:8px; margin-top:8px;">
+                    <button class="btn-secondary" onclick="testConnection()">🔌 Test Connection</button>
+                    <button class="btn-secondary" onclick="clearAllSessions()">🗑 Clear All Sessions</button>
+                </div>
+                <div id="connectionTestResult" style="display:none; margin-top:10px; padding:8px 12px; border-radius:6px; font-size:12px;"></div>
             </div>
         </div>
 

@@ -38,6 +38,13 @@
     --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4);
 }
 
+/* Force crisp font rendering in dark mode — prevents blurry text */
+[data-theme="dark"] body,
+[data-theme="dark"] * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
 /* ── Theme Toggle Button ───────────────────────────────────────────────────── */
 .theme-switcher {
     display: flex;
@@ -108,6 +115,9 @@ body {
     line-height: 1.6;
     display: flex;
     min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
 }
 
 .sidebar {
@@ -1066,3 +1076,68 @@ h2 .badge { font-size: 13px; margin-left: 8px; vertical-align: middle; }
 
 .btn-danger { background: var(--color-danger); color: white; border: none; padding: 10px 20px; border-radius: var(--radius-sm); font-size: 14px; font-weight: 500; cursor: pointer; transition: var(--transition); }
 .btn-danger:hover { background: #b91c1c; }
+
+/* ── Settings Page Enhancements ────────────────────────────────────────────── */
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+@media (max-width: 600px) {
+    .form-row { grid-template-columns: 1fr; }
+}
+
+.toggle-group {
+    display: flex;
+    align-items: flex-start;
+    flex-direction: column;
+    gap: 6px;
+}
+
+/* Toggle switch */
+.toggle-switch {
+    position: relative;
+    display: inline-block;
+    width: 40px;
+    height: 22px;
+    cursor: pointer;
+    flex-shrink: 0;
+}
+.toggle-switch input {
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+.toggle-slider {
+    position: absolute;
+    inset: 0;
+    background: var(--color-border);
+    border-radius: 999px;
+    transition: 0.2s;
+}
+.toggle-slider:before {
+    content: '';
+    position: absolute;
+    width: 16px;
+    height: 16px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: 0.2s;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+}
+.toggle-switch input:checked + .toggle-slider {
+    background: var(--color-accent);
+}
+.toggle-switch input:checked + .toggle-slider:before {
+    transform: translateX(18px);
+}
+[data-theme="dark"] .toggle-slider { background: #404040; }
+[data-theme="dark"] .toggle-switch input:checked + .toggle-slider { background: #ffffff; }
+[data-theme="dark"] .toggle-slider:before { background: #0a0a0a; }
+[data-theme="dark"] .toggle-switch input:checked + .toggle-slider:before { background: #0a0a0a; }
+
+.page-header {
+    margin-bottom: 20px;
+}

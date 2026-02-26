@@ -81,10 +81,10 @@ document.querySelectorAll('.nav-item').forEach((item) => {
         // Load data for the page being opened
         if (page === 'connect') loadConnectPage();
         if (page === 'overview') loadDashboard();
-        if (page === 'conversations') loadConversations();
-        if (page === 'knowledge') loadKnowledgeBase();
         if (page === 'conversations') { loadConversations(); loadHandoffs(); }
+        if (page === 'knowledge') loadKnowledgeBase();
         if (page === 'sessions') loadSessions();
+        if (page === 'settings') loadSettings();
     });
 });
 
@@ -154,6 +154,11 @@ async function loadConversations() {
 }
 
 async function loadMessages(chatId, userId) {
+    // Store for export and handoff functions
+    _currentChatId = chatId;
+    _currentChatUserId_export = userId;
+    currentChatUserId = userId + '@s.whatsapp.net';
+
     const panel = document.getElementById('messagePanel');
     const title = document.getElementById('messagePanelTitle');
     panel.style.display = 'flex';
@@ -177,6 +182,40 @@ async function loadMessages(chatId, userId) {
         msgs.scrollTop = msgs.scrollHeight;
     } catch (err) {
         msgs.innerHTML = '<p class="loading-text">Failed to load messages</p>';
+    }
+}
+
+// ── Export current chat as .txt ───────────────────────────────────────────────
+let _currentChatId = null;
+let _currentChatUserId_export = null;
+
+async function exportCurrentChat() {
+    if (!_currentChatId) return showToast('No chat open to export');
+    try {
+        const data = await api(`/api/conversations/${encodeURIComponent(_currentChatId)}/messages?limit=1000`);
+        if (!data.messages || data.messages.length === 0) return showToast('No messages to export');
+
+        const lines = [`Chat export: +${_currentChatUserId_export}`, `Exported: ${new Date().toLocaleString()}`, '─'.repeat(50), ''];
+        data.messages.forEach(m => {
+            const time = new Date(m.timestamp).toLocaleString();
+            const who = m.fromMe ? `[${global?.botName || 'Bot'}]` : `[+${_currentChatUserId_export}]`;
+            lines.push(`${time} ${who}`);
+            lines.push(m.message || '');
+            lines.push('');
+        });
+
+        const blob = new Blob([lines.join('\n')], { type: 'text/plain' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `chat_${_currentChatUserId_export}_${Date.now()}.txt`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('Chat exported ✓');
+    } catch (err) {
+        showToast('Export failed: ' + err.message);
     }
 }
 
@@ -317,7 +356,7 @@ async function importChatExport() {
     showImportStatus('loading', 'Importing... this may take a moment');
 
     try {
-        const res = await fetch('/api/import-chat', { method: 'POST', body: formData });
+        const res = await fetch(BACKEND + '/api/import-chat', { method: 'POST', body: formData });
         const data = await res.json();
 
         if (data.success) {
@@ -384,20 +423,174 @@ async function clearSession(userId) {
 }
 
 // ── Settings ──────────────────────────────────────────────────────────────────
-function saveSettings() {
-    const model = document.getElementById('aiModel').value;
-    const prompt = document.getElementById('systemPrompt').value;
-    // Store in localStorage for now — future: POST to /api/settings
-    localStorage.setItem('akay_settings', JSON.stringify({ model, prompt }));
-    showToast('Settings saved ✓');
+
+const GROQ_MODELS = [
+    { value: 'llama-3.3-70b-versatile', label: 'llama-3.3-70b-versatile (Best quality)' },
+    { value: 'llama-3.1-8b-instant',    label: 'llama-3.1-8b-instant (Fastest)' },
+    { value: 'mixtral-8x7b-32768',      label: 'mixtral-8x7b-32768 (Long context)' },
+    { value: 'gemma2-9b-it',            label: 'gemma2-9b-it (Google / efficient)' },
+];
+const GEMINI_MODELS = [
+    { value: 'gemini-2.0-flash',        label: 'gemini-2.0-flash (Fast & free)' },
+    { value: 'gemini-1.5-pro',          label: 'gemini-1.5-pro (Most capable)' },
+    { value: 'gemini-1.5-flash',        label: 'gemini-1.5-flash (Balanced)' },
+];
+const CLAUDE_MODELS = [
+    { value: 'claude-haiku-4-5',        label: 'claude-haiku-4-5 (Cheapest)' },
+    { value: 'claude-sonnet-4-5',       label: 'claude-sonnet-4-5 (Recommended)' },
+    { value: 'claude-opus-4-5',         label: 'claude-opus-4-5 (Most capable)' },
+];
+
+function updateModelOptions() {
+    const provider = document.getElementById('settingProvider')?.value || 'groq';
+    const modelSel = document.getElementById('settingModel');
+    if (!modelSel) return;
+    const models = provider === 'groq' ? GROQ_MODELS : provider === 'gemini' ? GEMINI_MODELS : CLAUDE_MODELS;
+    const current = modelSel.value;
+    modelSel.innerHTML = models.map(m =>
+        `<option value="${m.value}" ${m.value === current ? 'selected' : ''}>${m.label}</option>`
+    ).join('');
 }
 
-function loadSettings() {
+async function loadSettings() {
+    // Set backend URL display
+    const urlEl = document.getElementById('settingBackendUrl');
+    if (urlEl) urlEl.value = BACKEND;
+
     try {
-        const s = JSON.parse(localStorage.getItem('akay_settings') || '{}');
-        if (s.model) document.getElementById('aiModel').value = s.model;
-        if (s.prompt) document.getElementById('systemPrompt').value = s.prompt;
-    } catch (_) {}
+        // Load live settings from backend
+        const data = await api('/api/settings');
+        const env = data.settings || {};
+
+        // Provider & model
+        const provider = env.AI_PROVIDER || 'groq';
+        if (document.getElementById('settingProvider')) {
+            document.getElementById('settingProvider').value = provider;
+            updateModelOptions();
+            document.getElementById('settingModel').value = env.AI_MODEL || 'llama-3.3-70b-versatile';
+        }
+
+        // Tokens & temperature
+        if (document.getElementById('settingMaxTokens')) document.getElementById('settingMaxTokens').value = env.MAX_TOKENS || 1000;
+        if (document.getElementById('settingTemperature')) document.getElementById('settingTemperature').value = env.TEMPERATURE || 0.7;
+
+        // Bot identity
+        if (document.getElementById('settingBotName')) document.getElementById('settingBotName').value = env.BOT_NAME || '';
+        if (document.getElementById('settingBusinessName')) document.getElementById('settingBusinessName').value = env.BUSINESS_NAME || '';
+        if (document.getElementById('settingBusinessDesc')) document.getElementById('settingBusinessDesc').value = env.BUSINESS_DESCRIPTION || '';
+        if (document.getElementById('settingBusinessHours')) document.getElementById('settingBusinessHours').value = env.BUSINESS_HOURS || '';
+        if (document.getElementById('settingBusinessPhone')) document.getElementById('settingBusinessPhone').value = env.BUSINESS_PHONE || '';
+        if (document.getElementById('settingBusinessEmail')) document.getElementById('settingBusinessEmail').value = env.BUSINESS_EMAIL || '';
+        if (document.getElementById('settingBusinessLocation')) document.getElementById('settingBusinessLocation').value = env.BUSINESS_LOCATION || '';
+
+        // Behaviour
+        if (document.getElementById('settingContextLimit')) document.getElementById('settingContextLimit').value = env.CONTEXT_MESSAGE_LIMIT || 10;
+        if (document.getElementById('settingRateLimit')) document.getElementById('settingRateLimit').value = env.MAX_MESSAGES_PER_MINUTE || 30;
+        if (document.getElementById('settingFAQ')) document.getElementById('settingFAQ').checked = env.ENABLE_FAQ_MATCHING !== 'false';
+        if (document.getElementById('settingIntent')) document.getElementById('settingIntent').checked = env.ENABLE_INTENT_CLASSIFICATION !== 'false';
+        if (document.getElementById('settingDebug')) document.getElementById('settingDebug').checked = env.DEBUG_AI_ERRORS === 'true';
+
+        showSettingsStatus('success', '✓ Settings loaded from bot');
+    } catch (err) {
+        // Fallback to localStorage if backend not reachable
+        try {
+            const saved = JSON.parse(localStorage.getItem('akay_settings') || '{}');
+            if (saved.AI_PROVIDER && document.getElementById('settingProvider')) {
+                document.getElementById('settingProvider').value = saved.AI_PROVIDER;
+                updateModelOptions();
+            }
+            if (saved.AI_MODEL && document.getElementById('settingModel')) document.getElementById('settingModel').value = saved.AI_MODEL;
+        } catch (_) {}
+        showSettingsStatus('warning', '⚠️ Could not reach backend — showing last saved values');
+    }
+}
+
+async function saveSettings() {
+    const btn = document.getElementById('saveSettingsBtn');
+    if (btn) { btn.textContent = '⏳ Saving...'; btn.disabled = true; }
+
+    const settings = {
+        AI_PROVIDER:                document.getElementById('settingProvider')?.value || 'groq',
+        AI_MODEL:                   document.getElementById('settingModel')?.value || 'llama-3.3-70b-versatile',
+        MAX_TOKENS:                 document.getElementById('settingMaxTokens')?.value || '1000',
+        TEMPERATURE:                document.getElementById('settingTemperature')?.value || '0.7',
+        BOT_NAME:                   document.getElementById('settingBotName')?.value || '',
+        BUSINESS_NAME:              document.getElementById('settingBusinessName')?.value || '',
+        BUSINESS_DESCRIPTION:       document.getElementById('settingBusinessDesc')?.value || '',
+        BUSINESS_HOURS:             document.getElementById('settingBusinessHours')?.value || '',
+        BUSINESS_PHONE:             document.getElementById('settingBusinessPhone')?.value || '',
+        BUSINESS_EMAIL:             document.getElementById('settingBusinessEmail')?.value || '',
+        BUSINESS_LOCATION:          document.getElementById('settingBusinessLocation')?.value || '',
+        CONTEXT_MESSAGE_LIMIT:      document.getElementById('settingContextLimit')?.value || '10',
+        MAX_MESSAGES_PER_MINUTE:    document.getElementById('settingRateLimit')?.value || '30',
+        ENABLE_FAQ_MATCHING:        document.getElementById('settingFAQ')?.checked ? 'true' : 'false',
+        ENABLE_INTENT_CLASSIFICATION: document.getElementById('settingIntent')?.checked ? 'true' : 'false',
+        DEBUG_AI_ERRORS:            document.getElementById('settingDebug')?.checked ? 'true' : 'false',
+    };
+
+    // Always save to localStorage as backup
+    localStorage.setItem('akay_settings', JSON.stringify(settings));
+
+    try {
+        await api('/api/settings', {
+            method: 'POST',
+            body: JSON.stringify({ settings })
+        });
+        showSettingsStatus('success', '✅ Settings saved! Bot will apply changes immediately.');
+        showToast('Settings saved ✓');
+    } catch (err) {
+        showSettingsStatus('warning',
+            `⚠️ Saved locally but could not push to backend: ${err.message}. Update your Railway Variables manually.`
+        );
+        showToast('Saved locally (backend unreachable)');
+    }
+
+    if (btn) { btn.textContent = '💾 Save & Apply'; btn.disabled = false; }
+}
+
+function showSettingsStatus(type, msg) {
+    const el = document.getElementById('settingsSaveStatus');
+    if (!el) return;
+    el.style.display = 'block';
+    el.textContent = msg;
+    const colors = {
+        success: { bg: 'var(--color-success-bg)', color: 'var(--color-success)', border: 'var(--color-success)' },
+        warning: { bg: '#fefce8', color: '#854d0e', border: '#ca8a04' },
+        error:   { bg: '#fef2f2', color: 'var(--color-danger)', border: 'var(--color-danger)' },
+    };
+    const c = colors[type] || colors.error;
+    el.style.background = c.bg;
+    el.style.color = c.color;
+    el.style.border = `1px solid ${c.border}`;
+    if (type === 'success') setTimeout(() => { el.style.display = 'none'; }, 4000);
+}
+
+async function testConnection() {
+    const el = document.getElementById('connectionTestResult');
+    if (el) { el.style.display = 'block'; el.textContent = '⏳ Testing...'; el.style.background = '#fefce8'; el.style.color = '#854d0e'; }
+    try {
+        const data = await api('/api/health');
+        const msg = `✅ Connected! Bot status: ${data.connection} | Uptime: ${Math.floor(data.uptime/60)}m`;
+        if (el) { el.textContent = msg; el.style.background = 'var(--color-success-bg)'; el.style.color = 'var(--color-success)'; }
+        showToast('Backend reachable ✓');
+    } catch (err) {
+        if (el) { el.textContent = `❌ Cannot reach backend: ${err.message}`; el.style.background = '#fef2f2'; el.style.color = 'var(--color-danger)'; }
+    }
+}
+
+async function clearAllSessions() {
+    if (!confirm('Clear ALL user conversation sessions? This resets multi-step flows for all users.')) return;
+    try {
+        const sessions = await api('/api/sessions');
+        let cleared = 0;
+        for (const s of (sessions.sessions || [])) {
+            await api(`/api/sessions/${s.userId}`, { method: 'DELETE' });
+            cleared++;
+        }
+        showToast(`Cleared ${cleared} sessions ✓`);
+    } catch (err) {
+        showToast('Failed: ' + err.message);
+    }
 }
 
 // ── Chart ─────────────────────────────────────────────────────────────────────

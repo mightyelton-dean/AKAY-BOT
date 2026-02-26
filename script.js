@@ -706,7 +706,8 @@ function startConnectionPoller() {
         try {
             const data = await api('/api/connection');
             updateConnectUI(data);
-            if (data.status === 'connected') stopConnectionPoller();
+            // NOTE: do NOT stop polling when connected
+            // We need to keep polling to detect disconnects
         } catch (_) {}
     }, 2000);
 }
